@@ -13,6 +13,10 @@
 static int WIN_WIDTH = 800;
 static int WIN_HEIGHT = 800;
 
+static int SUBDIVISION_POINT_COUNT = 4;
+static std::vector<float> SUBDIVISION_SCHEME = { -((float) 1 / 6), (float) 4 / 6, (float) 4 / 6, -((float) 1 / 6) };
+float asd = (float) 1 / 6;
+
 GLint dragged = -1;
 
 GLfloat xNorm;
@@ -23,7 +27,6 @@ static std::vector<glm::vec3> myPoints =
 	glm::vec3(-0.5f, -0.5f, 0.0f),
 	glm::vec3(0.5f, 0.5f, 0.0f),
 };
-
 
 /* Vertex buffer objektum és vertex array objektum az adattároláshoz.*/
 GLuint VBO;
@@ -162,11 +165,6 @@ GLint getActivePoint(std::vector<glm::vec3> p, GLint size, GLfloat sens, GLfloat
 
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-
-}
-
 void updateData()
 {
 	std::vector<glm::vec3> allPoints;
@@ -176,6 +174,79 @@ void updateData()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, allPoints.size() * sizeof(glm::vec3), allPoints.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+int normalize_index(int index)
+{
+	int normalized_index;
+	if (index < 0)
+	{
+		normalized_index = myPoints.size() + index;
+	}
+	else if (index >= myPoints.size())
+	{
+		normalized_index = index - myPoints.size();
+	}
+	else
+	{
+		return index;
+	}
+}
+
+glm::vec3 subdivision(int start_index)
+{
+	float new_point_x, new_point_y;
+	glm::vec3 new_point = {0.0f, 0.0f, 0.0f};
+
+	new_point_x = 0.0f;
+	new_point_y = 0.0f;
+	for (int index = 0; index < SUBDIVISION_POINT_COUNT; index++)
+	{
+		int normalized_index = normalize_index(start_index + index);
+		glm::vec3 point = myPoints[normalized_index];
+		float point_x = point[0];
+		float point_y = point[1];
+
+		new_point_x += SUBDIVISION_SCHEME[index] * point_x;
+		new_point_y += SUBDIVISION_SCHEME[index] * point_y;
+	}
+
+	new_point[0] = new_point_x;
+	new_point[1] = new_point_y;
+
+	return new_point;
+}
+
+void add_points_from_subdivision(std::vector<glm::vec3> new_points)
+{
+	for (int index = 0; index < new_points.size(); index += 2)
+	{
+		myPoints.insert(myPoints.begin() + index, new_points[index / 2]);
+	}
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	std::vector<glm::vec3> new_points;
+	glm::vec3 new_point;
+
+	// Start subdivision
+	if (key == GLFW_KEY_ENTER)
+	{
+		// The subdivision needs at least 4 points
+		if (myPoints.size() > 3)
+		{
+			int count = myPoints.size();
+			for (int index = -2; index < count - 2; index++)
+			{
+				new_point = subdivision(index);
+				new_points.push_back(new_point);
+			}
+
+			add_points_from_subdivision(new_points);
+			updateData();
+		}
+	}
 }
 
 void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
