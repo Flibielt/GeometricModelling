@@ -10,10 +10,8 @@
 #include <fstream>
 #include <math.h>
 
-using namespace std;
-
-static int WIN_WIDTH = 400;
-static int WIN_HEIGHT = 400;
+static int WIN_WIDTH = 800;
+static int WIN_HEIGHT = 800;
 
 GLint dragged = -1;
 
@@ -37,7 +35,7 @@ bool checkOpenGLError() {
 	bool foundError = false;
 	int glErr = glGetError();
 	while (glErr != GL_NO_ERROR) {
-		cout << "glError: " << glErr << endl;
+		std::cout << "glError: " << glErr << std::endl;
 		foundError = true;
 		glErr = glGetError();
 	}
@@ -52,7 +50,7 @@ void printShaderLog(GLuint shader) {
 	if (len > 0) {
 		log = (char*)malloc(len);
 		glGetShaderInfoLog(shader, len, &chWrittn, log);
-		cout << "Shader Info Log: " << log << endl;
+		std::cout << "Shader Info Log: " << log << std::endl;
 		free(log);
 	}
 }
@@ -65,18 +63,18 @@ void printProgramLog(int prog) {
 	if (len > 0) {
 		log = (char*)malloc(len);
 		glGetProgramInfoLog(prog, len, &chWrittn, log);
-		cout << "Program Info Log: " << log << endl;
+		std::cout << "Program Info Log: " << log << std::endl;
 		free(log);
 	}
 }
 
-string readShaderSource(const char* filePath) {
-	string content;
-	ifstream fileStream(filePath, ios::in);
-	string line = "";
+std::string readShaderSource(const char* filePath) {
+	std::string content;
+	std::ifstream fileStream(filePath, std::ios::in);
+	std::string line = "";
 
 	while (!fileStream.eof()) {
-		getline(fileStream, line);
+		std::getline(fileStream, line);
 		content.append(line + "\n");
 	}
 	fileStream.close();
@@ -89,8 +87,8 @@ GLuint createShaderProgram() {
 	GLint fragCompiled;
 	GLint linked;
 
-	string vertShaderStr = readShaderSource("vertexShader.glsl");
-	string fragShaderStr = readShaderSource("fragmentShader.glsl");
+	std::string vertShaderStr = readShaderSource("vertexShader.glsl");
+	std::string fragShaderStr = readShaderSource("fragmentShader.glsl");
 
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -105,7 +103,7 @@ GLuint createShaderProgram() {
 	checkOpenGLError();
 	glGetShaderiv(vShader, GL_COMPILE_STATUS, &vertCompiled);
 	if (vertCompiled != 1) {
-		cout << "vertex compilation failed" << endl;
+		std::cout << "vertex compilation failed" << std::endl;
 		printShaderLog(vShader);
 	}
 
@@ -114,7 +112,7 @@ GLuint createShaderProgram() {
 	checkOpenGLError();
 	glGetShaderiv(vShader, GL_COMPILE_STATUS, &fragCompiled);
 	if (fragCompiled != 1) {
-		cout << "fragment compilation failed" << endl;
+		std::cout << "fragment compilation failed" << std::endl;
 		printShaderLog(fShader);
 	}
 
@@ -127,7 +125,7 @@ GLuint createShaderProgram() {
 	checkOpenGLError();
 	glGetProgramiv(vfProgram, GL_LINK_STATUS, &linked);
 	if (linked != 1) {
-		cout << "linking failed" << endl;
+		std::cout << "linking failed" << std::endl;
 		printProgramLog(vfProgram);
 	}
 
@@ -145,7 +143,7 @@ GLfloat dist2(glm::vec3 P1, glm::vec3 P2)
 	return t1 * t1 + t2 * t2;
 }
 
-GLint getActivePoint(vector<glm::vec3> p, GLint size, GLfloat sens, GLfloat x, GLfloat y)
+GLint getActivePoint(std::vector<glm::vec3> p, GLint size, GLfloat sens, GLfloat x, GLfloat y)
 {
 
 	GLint i;
