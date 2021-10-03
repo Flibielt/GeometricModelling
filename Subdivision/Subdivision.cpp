@@ -14,8 +14,8 @@ static int WIN_WIDTH = 800;
 static int WIN_HEIGHT = 800;
 
 static int SUBDIVISION_POINT_COUNT = 4;
-static std::vector<float> SUBDIVISION_SCHEME = { -((float) 1 / 6), (float) 4 / 6, (float) 4 / 6, -((float) 1 / 6) };
-float asd = (float) 1 / 6;
+static std::vector<float> SUBDIVISION_SCHEME = { -((float) 1 / 20), (float) 11 / 20, (float) 11 / 20, -((float) 1 / 20) };
+bool started_subdivision = false;
 
 GLint dragged = -1;
 
@@ -28,7 +28,7 @@ static std::vector<glm::vec3> myPoints =
 	glm::vec3(0.5f, 0.5f, 0.0f),
 };
 
-/* Vertex buffer objektum és vertex array objektum az adattároláshoz.*/
+/* Vertex buffer objektum ï¿½s vertex array objektum az adattï¿½rolï¿½shoz.*/
 GLuint VBO;
 GLuint VAO;
 
@@ -119,7 +119,7 @@ GLuint createShaderProgram() {
 		printShaderLog(fShader);
 	}
 
-	// Shader program objektum létrehozása. Eltároljuk az ID értéket.
+	// Shader program objektum lï¿½trehozï¿½sa. Eltï¿½roljuk az ID ï¿½rtï¿½ket.
 	GLuint vfProgram = glCreateProgram();
 	glAttachShader(vfProgram, vShader);
 	glAttachShader(vfProgram, fShader);
@@ -191,6 +191,8 @@ int normalize_index(int index)
 	{
 		return index;
 	}
+
+	return normalized_index;
 }
 
 glm::vec3 subdivision(int start_index)
@@ -219,10 +221,15 @@ glm::vec3 subdivision(int start_index)
 
 void add_points_from_subdivision(std::vector<glm::vec3> new_points)
 {
-	for (int index = 0; index < new_points.size(); index += 2)
+	std::vector<glm::vec3> points;
+	for (int index = 0; index < new_points.size(); index++)
 	{
-		myPoints.insert(myPoints.begin() + index, new_points[index / 2]);
+		points.push_back(new_points[index]);
+		points.push_back(myPoints[index]);
 	}
+
+	myPoints.clear();
+	myPoints = points;
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -231,7 +238,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	glm::vec3 new_point;
 
 	// Start subdivision
-	if (key == GLFW_KEY_ENTER)
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 	{
 		// The subdivision needs at least 4 points
 		if (myPoints.size() > 3)
@@ -245,6 +252,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 			add_points_from_subdivision(new_points);
 			updateData();
+			started_subdivision = true;
 		}
 	}
 }
@@ -300,60 +308,60 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 void init(GLFWwindow* window) {
 	renderingProgram = createShaderProgram();
 
-	/* Létrehozzuk a szükséges Vertex buffer és vertex array objektumot. */
+	/* Lï¿½trehozzuk a szï¿½ksï¿½ges Vertex buffer ï¿½s vertex array objektumot. */
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);
 
-	/* Típus meghatározása: a GL_ARRAY_BUFFER nevesített csatolóponthoz kapcsoljuk a buffert (ide kerülnek a vertex adatok). */
+	/* Tï¿½pus meghatï¿½rozï¿½sa: a GL_ARRAY_BUFFER nevesï¿½tett csatolï¿½ponthoz kapcsoljuk a buffert (ide kerï¿½lnek a vertex adatok). */
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	/* Másoljuk az adatokat a pufferbe! Megadjuk az aktuálisan csatolt puffert,  azt hogy hány bájt adatot másolunk,
-	a másolandó adatot, majd a feldolgozás módját is meghatározzuk: most az adat nem változik a feltöltés után */
+	/* Mï¿½soljuk az adatokat a pufferbe! Megadjuk az aktuï¿½lisan csatolt puffert,  azt hogy hï¿½ny bï¿½jt adatot mï¿½solunk,
+	a mï¿½solandï¿½ adatot, majd a feldolgozï¿½s mï¿½djï¿½t is meghatï¿½rozzuk: most az adat nem vï¿½ltozik a feltï¿½ltï¿½s utï¿½n */
 	glBufferData(GL_ARRAY_BUFFER, myPoints.size() * sizeof(glm::vec3), myPoints.data(), GL_STATIC_DRAW);
 
-	/* A puffer kész, lecsatoljuk, már nem szeretnénk módosítani. */
+	/* A puffer kï¿½sz, lecsatoljuk, mï¿½r nem szeretnï¿½nk mï¿½dosï¿½tani. */
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	/* Csatoljuk a vertex array objektumunkat a konfiguráláshoz. */
+	/* Csatoljuk a vertex array objektumunkat a konfigurï¿½lï¿½shoz. */
 	glBindVertexArray(VAO);
 
-	/* Vertex buffer objektum újracsatolása. */
+	/* Vertex buffer objektum ï¿½jracsatolï¿½sa. */
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	/* Ezen adatok szolgálják a 0 indexû vertex attribútumot (itt: pozíció).
-	Elsõként megadjuk ezt az azonosítószámot.
-	Utána az attribútum méretét (vec3, láttuk a shaderben).
-	Harmadik az adat típusa.
-	Negyedik az adat normalizálása, ez maradhat FALSE jelen példában.
-	Az attribútum értékek hogyan következnek egymás után? Milyen lépésköz után találom a következõ vertex adatait?
-	Végül megadom azt, hogy honnan kezdõdnek az értékek a pufferben. Most rögtön, a legelejétõl veszem õket.*/
+	/* Ezen adatok szolgï¿½ljï¿½k a 0 indexï¿½ vertex attribï¿½tumot (itt: pozï¿½ciï¿½).
+	Elsï¿½kï¿½nt megadjuk ezt az azonosï¿½tï¿½szï¿½mot.
+	Utï¿½na az attribï¿½tum mï¿½retï¿½t (vec3, lï¿½ttuk a shaderben).
+	Harmadik az adat tï¿½pusa.
+	Negyedik az adat normalizï¿½lï¿½sa, ez maradhat FALSE jelen pï¿½ldï¿½ban.
+	Az attribï¿½tum ï¿½rtï¿½kek hogyan kï¿½vetkeznek egymï¿½s utï¿½n? Milyen lï¿½pï¿½skï¿½z utï¿½n talï¿½lom a kï¿½vetkezï¿½ vertex adatait?
+	Vï¿½gï¿½l megadom azt, hogy honnan kezdï¿½dnek az ï¿½rtï¿½kek a pufferben. Most rï¿½gtï¿½n, a legelejï¿½tï¿½l veszem ï¿½ket.*/
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-	/* Engedélyezzük az imént definiált 0 indexû attribútumot. */
+	/* Engedï¿½lyezzï¿½k az imï¿½nt definiï¿½lt 0 indexï¿½ attribï¿½tumot. */
 	glEnableVertexAttribArray(0);
 
-	/* Leválasztjuk a vertex array objektumot és a puufert is.*/
+	/* Levï¿½lasztjuk a vertex array objektumot ï¿½s a puufert is.*/
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-/** A jelenetünk utáni takarítás. */
+/** A jelenetï¿½nk utï¿½ni takarï¿½tï¿½s. */
 void cleanUpScene()
 {
-	/** Töröljük a vertex puffer és vertex array objektumokat. */
+	/** Tï¿½rï¿½ljï¿½k a vertex puffer ï¿½s vertex array objektumokat. */
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 
-	/** Töröljük a shader programot. */
+	/** Tï¿½rï¿½ljï¿½k a shader programot. */
 	glDeleteProgram(renderingProgram);
 }
 
 void display(GLFWwindow* window, double currentTime) {
 	unsigned int colorLoc;
 	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // fontos lehet minden egyes alkalommal törölni!
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // fontos lehet minden egyes alkalommal tï¿½rï¿½lni!
 
-	// aktiváljuk a shader-program objektumunkat.
+	// aktivï¿½ljuk a shader-program objektumunkat.
 	glUseProgram(renderingProgram);
 
 	/*Csatoljuk a vertex array objektumunkat. */
@@ -369,50 +377,57 @@ void display(GLFWwindow* window, double currentTime) {
 	colorLoc = glGetUniformLocation(renderingProgram, "color");
 	glUniform3f(colorLoc, 0.0f, 0.0f, 1.0f);
 	glLineWidth(4.0f);
-	glDrawArrays(GL_LINE_STRIP, 0, myPoints.size());
+	if (started_subdivision)
+	{
+		glDrawArrays( GL_LINE_LOOP, 0, myPoints.size());
+	}
+	else
+	{
+		glDrawArrays( GL_LINE_STRIP, 0, myPoints.size());
+	}
 
-	/* Leválasztjuk, nehogy bármilyen érték felülíródjon.*/
+	/* Levï¿½lasztjuk, nehogy bï¿½rmilyen ï¿½rtï¿½k felï¿½lï¿½rï¿½djon.*/
 	glBindVertexArray(0);
 }
 
 int main(void) {
 
-	/* Próbáljuk meg inicializálni a GLFW-t! */
+	/* Prï¿½bï¿½ljuk meg inicializï¿½lni a GLFW-t! */
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
-	/* A kívánt OpenGL verzió (4.3) */
+	/* A kï¿½vï¿½nt OpenGL verziï¿½ (4.3) */
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-	/* Próbáljuk meg létrehozni az ablakunkat. */
+	/* Prï¿½bï¿½ljuk meg lï¿½trehozni az ablakunkat. */
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Drag and drop", NULL, NULL);
 
-	/* Válasszuk ki az ablakunk OpenGL kontextusát, hogy használhassuk. */
+	/* Vï¿½lasszuk ki az ablakunk OpenGL kontextusï¿½t, hogy hasznï¿½lhassuk. */
 	glfwMakeContextCurrent(window);
 
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, cursorPosCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-	/* Incializáljuk a GLEW-t, hogy elérhetõvé váljanak az OpenGL függvények. */
+	/* Incializï¿½ljuk a GLEW-t, hogy elï¿½rhetï¿½vï¿½ vï¿½ljanak az OpenGL fï¿½ggvï¿½nyek. */
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 	glfwSwapInterval(1);
 
-	/* Az alkalmazáshoz kapcsolódó elõkészítõ lépések, pl. hozd létre a shader objektumokat. */
+	/* Az alkalmazï¿½shoz kapcsolï¿½dï¿½ elï¿½kï¿½szï¿½tï¿½ lï¿½pï¿½sek, pl. hozd lï¿½tre a shader objektumokat. */
 	init(window);
 
 	while (!glfwWindowShouldClose(window)) {
-		/* a kód, amellyel rajzolni tudunk a GLFWwindow ojektumunkba. */
+		/* a kï¿½d, amellyel rajzolni tudunk a GLFWwindow ojektumunkba. */
 		display(window, glfwGetTime());
 		/* double buffered */
 		glfwSwapBuffers(window);
-		/* események kezelése az ablakunkkal kapcsolatban, pl. gombnyomás */
+		/* esemï¿½nyek kezelï¿½se az ablakunkkal kapcsolatban, pl. gombnyomï¿½s */
 		glfwPollEvents();
 	}
 
-	/* töröljük a GLFW ablakot. */
+	/* tï¿½rï¿½ljï¿½k a GLFW ablakot. */
 	glfwDestroyWindow(window);
-	/* Leállítjuk a GLFW-t */
+	/* Leï¿½llï¿½tjuk a GLFW-t */
 
 	cleanUpScene();
 
