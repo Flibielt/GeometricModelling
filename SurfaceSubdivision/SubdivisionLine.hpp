@@ -2,7 +2,7 @@
 #define SUBDIVISION_LINE_H
 
 #include "glm/glm.hpp"
-#include "SubdivisionSurface.h"
+#include "SubdivisionSurface.hpp"
 
 class SubdivisionLine
 {
