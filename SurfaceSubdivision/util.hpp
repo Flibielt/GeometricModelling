@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <GL/glew.h>
 
 #include <iostream>
@@ -13,3 +16,5 @@ void printProgramLog(int prog);
 std::string readShaderSource(const char* filePath);
 GLuint createShaderProgram();
 
+
+#endif
