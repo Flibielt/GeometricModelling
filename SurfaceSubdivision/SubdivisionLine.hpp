@@ -23,10 +23,15 @@ public:
     glm::vec3* pRightTraverseSucc;
 
     SubdivisionLine();
+
     SubdivisionLine(glm::vec3* pStartPoint, glm::vec3* pEndPoint, 
         SubdivisionSurface* pLeftSubdivisionSurface, SubdivisionSurface* pRightSubdivisionSurface,
         glm::vec3* pLeftTraversePred, glm::vec3* pLeftTraverseRight,
         glm::vec3* pRightTraversePred, glm::vec3* pRightTraverseSucc);
+
+    SubdivisionLine(glm::vec3* pStartPoint, glm::vec3* pEndPoint, 
+        SubdivisionSurface* pLeftSubdivisionSurface, SubdivisionSurface* pRightSubdivisionSurface);
+    
     ~SubdivisionLine();
 };
 

@@ -22,6 +22,16 @@ SubdivisionLine::SubdivisionLine(glm::vec3* pStartPoint, glm::vec3* pEndPoint,
     this->pRightTraverseSucc = pRightTraverseSucc;
 }
 
+SubdivisionLine::SubdivisionLine(glm::vec3* pStartPoint, glm::vec3* pEndPoint, 
+        SubdivisionSurface* pLeftSubdivisionSurface, SubdivisionSurface* pRightSubdivisionSurface)
+{
+    this->pStartPoint = pStartPoint;
+    this->pEndPoint = pEndPoint;
+
+    this->pLeftSubdivisionSurface = pLeftSubdivisionSurface;
+    this->pRightSubdivisionSurface = pRightSubdivisionSurface;
+}
+
 SubdivisionLine::~SubdivisionLine()
 {
 }
