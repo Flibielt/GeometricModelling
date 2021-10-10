@@ -6,7 +6,7 @@
 
 class SubdivisionLine
 {
-private:
+public:
     glm::vec3* pStartPoint;
     glm::vec3* pEndPoint;
 
@@ -21,10 +21,13 @@ private:
     // Right traverse
     glm::vec3* pRightTraversePred;
     glm::vec3* pRightTraverseSucc;
-public:
-    SubdivisionLine(/* args */);
-    ~SubdivisionLine();
 
+    SubdivisionLine();
+    SubdivisionLine(glm::vec3* pStartPoint, glm::vec3* pEndPoint, 
+        SubdivisionSurface* pLeftSubdivisionSurface, SubdivisionSurface* pRightSubdivisionSurface,
+        glm::vec3* pLeftTraversePred, glm::vec3* pLeftTraverseRight,
+        glm::vec3* pRightTraversePred, glm::vec3* pRightTraverseSucc);
+    ~SubdivisionLine();
 };
 
 #endif
