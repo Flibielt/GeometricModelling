@@ -12,10 +12,6 @@
 
 #include "util.hpp"
 
-static int SUBDIVISION_POINT_COUNT = 4;
-static std::vector<float> SUBDIVISION_SCHEME = { -((float) 1 / 20), (float) 11 / 20, (float) 11 / 20, -((float) 1 / 20) };
-bool started_subdivision = false;
-
 GLint dragged = -1;
 
 GLfloat xNorm;
@@ -32,34 +28,6 @@ GLuint VAO;
 
 GLuint renderingProgram;
 
-
-GLfloat dist2(glm::vec3 P1, glm::vec3 P2)
-{
-	GLfloat t1 = P1.x - P2.x;
-	GLfloat t2 = P1.y - P2.y;
-
-	return t1 * t1 + t2 * t2;
-}
-
-GLint getActivePoint(std::vector<glm::vec3> p, GLint size, GLfloat sens, GLfloat x, GLfloat y)
-{
-
-	GLint i;
-	GLfloat s = sens * sens;
-
-	xNorm = x / (WIN_WIDTH / 2) - 1.0f;
-	yNorm = y / (WIN_HEIGHT / 2) - 1.0f;
-	glm::vec3 P = glm::vec3(xNorm, yNorm, 0.0f);
-
-	for (i = 0; i < size; i++) {
-		if (dist2(p[i], P) < s) {
-			return i;
-		}
-	}
-	return -1;
-
-}
-
 void updateData()
 {
 	std::vector<glm::vec3> allPoints;
@@ -71,85 +39,9 @@ void updateData()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-int normalize_index(int index)
-{
-	int normalized_index;
-	if (index < 0)
-	{
-		normalized_index = myPoints.size() + index;
-	}
-	else if (index >= myPoints.size())
-	{
-		normalized_index = index - myPoints.size();
-	}
-	else
-	{
-		return index;
-	}
-
-	return normalized_index;
-}
-
-glm::vec3 subdivision(int start_index)
-{
-	float new_point_x, new_point_y;
-	glm::vec3 new_point = {0.0f, 0.0f, 0.0f};
-
-	new_point_x = 0.0f;
-	new_point_y = 0.0f;
-	for (int index = 0; index < SUBDIVISION_POINT_COUNT; index++)
-	{
-		int normalized_index = normalize_index(start_index + index);
-		glm::vec3 point = myPoints[normalized_index];
-		float point_x = point[0];
-		float point_y = point[1];
-
-		new_point_x += SUBDIVISION_SCHEME[index] * point_x;
-		new_point_y += SUBDIVISION_SCHEME[index] * point_y;
-	}
-
-	new_point[0] = new_point_x;
-	new_point[1] = new_point_y;
-
-	return new_point;
-}
-
-void add_points_from_subdivision(std::vector<glm::vec3> new_points)
-{
-	std::vector<glm::vec3> points;
-	for (int index = 0; index < new_points.size(); index++)
-	{
-		points.push_back(new_points[index]);
-		points.push_back(myPoints[index]);
-	}
-
-	myPoints.clear();
-	myPoints = points;
-}
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	std::vector<glm::vec3> new_points;
-	glm::vec3 new_point;
-
-	// Start subdivision
-	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
-	{
-		// The subdivision needs at least 4 points
-		if (myPoints.size() > 3)
-		{
-			int count = myPoints.size();
-			for (int index = -2; index < count - 2; index++)
-			{
-				new_point = subdivision(index);
-				new_points.push_back(new_point);
-			}
-
-			add_points_from_subdivision(new_points);
-			updateData();
-			started_subdivision = true;
-		}
-	}
 }
 
 void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
@@ -171,33 +63,6 @@ void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-	GLint i;
-	double x, y;
-	glfwGetCursorPos(window, &x, &y);
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		if ((i = getActivePoint(myPoints, myPoints.size(), 0.1f, x, WIN_HEIGHT - y)) != -1)
-		{
-			dragged = i;
-		}
-	}
-
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-		dragged = -1;
-	}
-
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-	{
-		if ((i = getActivePoint(myPoints, myPoints.size(), 0.1f, x, WIN_HEIGHT - y)) != -1)
-		{
-			myPoints.erase(myPoints.begin() + i);
-		}
-		else
-		{
-			myPoints.push_back(glm::vec3(xNorm, yNorm, 0.0f));
-		}
-
-		updateData();
-	}
 }
 
 void init(GLFWwindow* window) {
@@ -247,14 +112,7 @@ void display(GLFWwindow* window, double currentTime) {
 	colorLoc = glGetUniformLocation(renderingProgram, "color");
 	glUniform3f(colorLoc, 0.0f, 0.0f, 1.0f);
 	glLineWidth(4.0f);
-	if (started_subdivision)
-	{
-		glDrawArrays( GL_LINE_LOOP, 0, myPoints.size());
-	}
-	else
-	{
-		glDrawArrays( GL_LINE_STRIP, 0, myPoints.size());
-	}
+	glDrawArrays( GL_LINE_STRIP, 0, myPoints.size());
 
 	glBindVertexArray(0);
 }
