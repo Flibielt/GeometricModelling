@@ -127,7 +127,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+	{
 		enableMouse = !enableMouse;
+		if (enableMouse)
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+		else
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_NORMAL);
+	}
 }
 
 /** Kiszámoljuk a kamera mátrixokat. */
@@ -159,8 +165,8 @@ void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
 	
 	if (firstMouse)
     {
-        lastX = xPos;
-        lastY = yPos;
+        lastX = WIN_WIDTH / 2;
+        lastY = WIN_HEIGHT / 2;
         firstMouse = false;
     }
 
@@ -182,11 +188,12 @@ void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
     if (pitch < -89.0f)
         pitch = -89.0f;
 
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(front);
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    cameraFront = glm::normalize(direction);
 
 }
 
@@ -271,6 +278,7 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Surface Subversion", NULL, NULL);
+	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
 	glfwMakeContextCurrent(window);
 
