@@ -30,12 +30,20 @@ static std::vector<glm::vec3> myPoints =
 };
 
 /* Vegyük fel a kamera pozicót tároló változót, illetve a tengelyekhezz szükséges vektorokat. */
+/*
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f), cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f), up = glm::vec3(0.0f, 1.0f, 0.0f),
-cameraMoving = glm::vec3(0.0, 0.0, -1.0);
+	cameraMoving = glm::vec3(0.0, 0.0, -1.0);
+*/
 float deltaTime = 0.0f, lastTime = 0.0f;
 
 /** Vetítési és kamera mátrixok felvétele. */
-glm::mat4 view, projection;
+glm::mat4 view;
+glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
+
+// camera
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 
 std::vector<glm::vec3> points;
 std::vector<SubdivisionSurface> surfaces;
@@ -100,37 +108,26 @@ void updateData()
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	float cameraSpeed = 2.5f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
-	if (key == GLFW_KEY_W && action == GLFW_REPEAT)
-	{
-		/* A kamera számára számítsuk ki az elõre mutató irányt .*/
-		cameraPos += cameraSpeed * cameraMoving;
-	}
-
-	if (key == GLFW_KEY_S && action == GLFW_REPEAT)
-	{
-		cameraPos -= cameraSpeed * cameraMoving;
-	}
-
-	if (key == GLFW_KEY_A && action == GLFW_REPEAT)
-	{
-		/* A kamera számára számítsuk ki a jobbra mutató irányt .*/
-		cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraMoving, up));
-	}
-
-	if (key == GLFW_KEY_D && action == GLFW_REPEAT)
-	{
-		cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraMoving, up));
-	}
+    float cameraSpeed = 2.5 * deltaTime; 
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 /** Kiszámoljuk a kamera mátrixokat. */
 void computeCameraMatrices()
 {
 	/* A paraméterek rendre: az új koordinátarendszerünk középpontja (hol a kamera), merre néz a kamera, mit tekintünk ,,fölfele" iránynak */
-	view = glm::lookAt(cameraPos, cameraPos + cameraMoving, up);
-	projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
+	//view = glm::lookAt(cameraPos, cameraPos + cameraMoving, up);
+	//projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
 }
 
 void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
@@ -211,13 +208,12 @@ void display(GLFWwindow* window, double currentTime) {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 	unsigned int modelLoc = glGetUniformLocation(renderingProgram, "model");
+	
 
-	computeCameraMatrices();
-	unsigned int viewLoc = glGetUniformLocation(renderingProgram, "view");
+	//computeCameraMatrices();
+	
 	unsigned int projectionLoc = glGetUniformLocation(renderingProgram, "projection");
-
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	glBindVertexArray(0);
@@ -248,6 +244,10 @@ int main(void) {
 	updateData();
 
 	while (!glfwWindowShouldClose(window)) {
+
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		unsigned int viewLoc = glGetUniformLocation(renderingProgram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
 		float currentTime = glfwGetTime();
 		deltaTime = currentTime - lastTime;
