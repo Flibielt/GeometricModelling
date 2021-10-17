@@ -102,3 +102,72 @@ GLuint createShaderProgram() {
 
 	return vfProgram;
 }
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    float cameraSpeed = 2.5 * deltaTime; 
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+	{
+		enableMouse = !enableMouse;
+		if (enableMouse)
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+		else
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_NORMAL);
+	}
+}
+
+void cursorPosCallback(GLFWwindow* window, double xPos, double yPos)
+{
+	// Mouse movement
+	if (enableMouse == false)
+		return;
+	
+	if (firstMouse)
+    {
+        lastX = WIN_WIDTH / 2;
+        lastY = WIN_HEIGHT / 2;
+        firstMouse = false;
+    }
+
+    float xoffset = xPos - lastX;
+    float yoffset = lastY - yPos; // reversed since y-coordinates go from bottom to top
+    lastX = xPos;
+    lastY = yPos;
+
+    float sensitivity = 0.03f; // change this value to your liking
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    cameraFront = glm::normalize(direction);
+
+}
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+}
+
