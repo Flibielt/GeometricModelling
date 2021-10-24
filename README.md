@@ -13,3 +13,8 @@ http://multires.caltech.edu/pubs/sig00notes.pdf
 * Modified butterfly scheme
 
 
+File format:
+
+* obj: recommended
+* x3d: successor of vml
+* ply
