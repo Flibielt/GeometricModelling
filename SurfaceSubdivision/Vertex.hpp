@@ -12,6 +12,9 @@ public:
     
     Vertex(/* args */);
     ~Vertex();
+
+    bool operator==(const Vertex& v1);
+    bool operator!=(const Vertex& v1);
 };
 
 #endif

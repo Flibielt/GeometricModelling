@@ -26,7 +26,8 @@ public:
     Edge(/* args */);
     ~Edge();
 
-    bool isEqual(Vertex point1, Vertex point2);
+    bool operator==(const Edge& other);
+    bool operator!=(const Edge& other);
 };
 
 
