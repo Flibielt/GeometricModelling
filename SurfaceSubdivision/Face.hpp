@@ -6,6 +6,8 @@
 #include "Edge.hpp"
 #include "Vertex.hpp"
 
+class Edge;
+
 class Face
 {
 private:

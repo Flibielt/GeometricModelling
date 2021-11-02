@@ -2,7 +2,9 @@
 #define EDGE_H
 
 #include "Vertex.hpp"
-//#include "Face.hpp"
+#include "Face.hpp"
+
+class Face;
 
 class Edge
 {
@@ -12,8 +14,8 @@ public:
     Vertex* pStartPoint;
     Vertex* pEndPoint;
 
-    //Face* leftFace;
-    //Face* rightFace;
+    Face* leftFace;
+    Face* rightFace;
 
     Edge* leftTraversePredecessor;
     Edge* leftTraverseSuccessor;
