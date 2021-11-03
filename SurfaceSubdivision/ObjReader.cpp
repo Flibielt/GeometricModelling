@@ -38,6 +38,8 @@ void ObjReader::readFile(std::string fileName)
     }
     
     file.close();
+
+    createEdges();
 }
 
 
@@ -102,6 +104,43 @@ Face ObjReader::parseFace(std::string line)
     return face;
 }
 
+void ObjReader::createEdges()
+{
+    for (Face f : faces)
+    {
+        Edge edge1;
+        edge1.pStartPoint = f.vertices[0];
+        edge1.pEndPoint = f.vertices[1];
+
+        if (isUniqueEdge(&edge1))
+            edges.push_back(edge1);
+
+        Edge edge2;
+        edge2.pStartPoint = f.vertices[1];
+        edge2.pEndPoint = f.vertices[2];
+        if (isUniqueEdge(&edge2))
+            edges.push_back(edge2);
+
+        Edge edge3;
+        edge3.pStartPoint = f.vertices[2];
+        edge3.pEndPoint = f.vertices[0];
+
+        if (isUniqueEdge(&edge3))
+            edges.push_back(edge3);
+    }
+}
+
+bool ObjReader::isUniqueEdge(Edge* newEdge)
+{
+    for (Edge edge : edges)
+    {
+        if (edge == *newEdge)
+            return false;
+    }
+
+    return true;
+}
+
 std::vector<Vertex> ObjReader::getVertices()
 {
     return vertices;
@@ -120,12 +159,17 @@ std::vector<Face> ObjReader::getFaces()
 
 int getVertexIndex(std::string vertex)
 {
+    int vertexIndex = 0;
     std::size_t index = vertex.find("/");
 
     if (index == std::string::npos)
     {
         return std::stoi(vertex);
     }
+
+    vertexIndex = std::stoi(vertex.substr(0, index));
+    // In the obj files vertex indexes starts with 1
+    vertexIndex--; 
     
-    return std::stoi(vertex.substr(0, index));
+    return vertexIndex;
 }
