@@ -10,6 +10,8 @@ https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/model/winged-e.html
 
 ![tetrahedron](/data/wing-2.jpg)
 
+Main data table:
+
 <TABLE BORDER=3>
      <TR ALIGN=CENTER>
           <TD> <B><I>Edge</I></B> </TD>
@@ -73,6 +75,11 @@ https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/model/winged-e.html
      </TR>
 </TABLE>
 
+Other tables:
+
+<TABLE CELLPADDING=4 BORDER=0 >
+<TR>
+<TD>
 <TABLE BORDER=3>
      <TR ALIGN=CENTER>
           <TD> <B><I>Vertex Name</B></I> </TD>
@@ -91,7 +98,8 @@ https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/model/winged-e.html
           <TD> D </TD>   <TD> e </TD>
      </TR>
 </TABLE>
-
+</TD>
+<TD>
 <TABLE BORDER=3>
      <TR ALIGN=CENTER>
           <TD> <B><I>Face Name</B></I> </TD>
@@ -109,6 +117,9 @@ https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/model/winged-e.html
      <TR ALIGN=CENTER>
           <TD> 4 </TD>   <TD> b </TD>
      </TR>
+</TABLE>
+</TD>
+</TR>
 </TABLE>
 
 
