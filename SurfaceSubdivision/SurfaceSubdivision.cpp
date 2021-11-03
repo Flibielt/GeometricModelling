@@ -16,6 +16,10 @@
 #include "util.hpp"
 #include "SubdivisionLine.hpp"
 #include "SubdivisionSurface.hpp"
+#include "Vertex.hpp"
+#include "Edge.hpp"
+#include "Face.hpp"
+#include "ObjReader.hpp"
 
 
 static std::vector<glm::vec3> myPoints =
@@ -30,58 +34,23 @@ glm::mat4 view;
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
 
 std::vector<glm::vec3> points;
-std::vector<SubdivisionSurface> surfaces;
-std::vector<SubdivisionLine> lines;
+std::vector<Edge> edges;
 
 GLuint VBO;
 GLuint VAO;
 
 GLuint renderingProgram;
 
-void createSurface()
-{
-	glm::vec3 pointA = glm::vec3(-0.5f, 0.0f, 0.0f);
-	glm::vec3 pointB = glm::vec3(0.0f, 0.0f, 0.5f);
-	glm::vec3 pointC = glm::vec3(0.5f, 0.0f, 0.0f);
-	glm::vec3 pointD = glm::vec3(0.0f, 0.5f, 0.0f);
-
-	points.push_back(pointA);
-	points.push_back(pointB);
-	points.push_back(pointC);
-	points.push_back(pointD);
-
-	SubdivisionSurface surface1 = SubdivisionSurface(pointA, pointB, pointD);
-	SubdivisionSurface surface2 = SubdivisionSurface(pointB, pointC, pointD);
-	SubdivisionSurface surface3 = SubdivisionSurface(pointA, pointC, pointD);
-	SubdivisionSurface surface4 = SubdivisionSurface(pointA, pointB, pointC);
-
-	surfaces.push_back(surface1);
-	surfaces.push_back(surface2);
-	surfaces.push_back(surface3);
-	surfaces.push_back(surface4);
-
-	SubdivisionLine lineA = SubdivisionLine(&pointA, &pointD, &surface3, &surface1);
-	SubdivisionLine lineB = SubdivisionLine(&pointA, &pointB, &surface1, &surface4);
-	SubdivisionLine lineC = SubdivisionLine(&pointB, &pointD, &surface1, &surface2);
-	SubdivisionLine lineD = SubdivisionLine(&pointB, &pointC, &surface2, &surface4);
-	SubdivisionLine lineE = SubdivisionLine(&pointC, &pointD, &surface2, &surface3);
-	SubdivisionLine lineF = SubdivisionLine(&pointA, &pointC, &surface4, &surface3);
-
-	lines.push_back(lineA);
-	lines.push_back(lineB);
-	lines.push_back(lineC);
-	lines.push_back(lineD);
-	lines.push_back(lineE);
-	lines.push_back(lineF);
-}
+ObjReader objReader;
 
 void updateData()
 {
 	std::vector<glm::vec3> allPoints;
 
-	for (int i = 0; i < surfaces.size(); i++)
+	for (Edge edge : edges)
 	{
-		allPoints.insert(std::end(allPoints), std::begin(surfaces[i].points), std::end(surfaces[i].points));
+		allPoints.push_back(edge.pStartPoint->point);
+		allPoints.push_back(edge.pEndPoint->point);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -126,18 +95,15 @@ void display(GLFWwindow* window, double currentTime) {
 
 	glBindVertexArray(VAO);
 
-	for (int i = 0; i < surfaces.size(); i++)
+	int start = 0;
+	for (int i = 0; i < edges.size(); i++)
 	{
-		int start = (i * 3) - 1;
-		colorLoc = glGetUniformLocation(renderingProgram, "color");
-		glUniform3f(colorLoc, 1.0f, 0.0f, 0.0f);
-		glPointSize(10.0f);
-		glDrawArrays(GL_POINTS, start, surfaces[i].points.size());
-
 		colorLoc = glGetUniformLocation(renderingProgram, "color");
 		glUniform3f(colorLoc, 0.0f, 0.0f, 1.0f);
 		glLineWidth(4.0f);
-		glDrawArrays(GL_LINE_LOOP, start, surfaces[i].points.size());
+		glDrawArrays(GL_LINES, start, sizeof(glm::vec3) * 2);
+
+		start += 2;
 	}
 
 	glm::mat4 model = glm::mat4(1.0f);
@@ -153,6 +119,9 @@ void display(GLFWwindow* window, double currentTime) {
 }
 
 int main(void) {
+
+	objReader.readFile("bunny.obj");
+	edges = objReader.getEdges();
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
@@ -173,7 +142,6 @@ int main(void) {
 
 	init(window);
 
-	createSurface();
 	updateData();
 
 	while (!glfwWindowShouldClose(window)) {
