@@ -14,8 +14,6 @@
 #include <list>
 
 #include "util.hpp"
-#include "SubdivisionLine.hpp"
-#include "SubdivisionSurface.hpp"
 #include "Vertex.hpp"
 #include "Edge.hpp"
 #include "Face.hpp"
