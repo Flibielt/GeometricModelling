@@ -106,36 +106,82 @@ Face ObjReader::parseFace(std::string line)
 
 void ObjReader::createEdges()
 {
+    std::vector<Edge>::iterator it;
+    int index;
+    bool unique;
+
     for (Face f : faces)
     {
-        Edge edge1;
-        edge1.pStartPoint = f.vertices[0];
-        edge1.pEndPoint = f.vertices[1];
-
-        if (isUniqueEdge(&edge1))
-            edges.push_back(edge1);
-
-        Edge edge2;
-        edge2.pStartPoint = f.vertices[1];
-        edge2.pEndPoint = f.vertices[2];
-        if (isUniqueEdge(&edge2))
-            edges.push_back(edge2);
-
-        Edge edge3;
-        edge3.pStartPoint = f.vertices[2];
-        edge3.pEndPoint = f.vertices[0];
-
-        if (isUniqueEdge(&edge3))
-            edges.push_back(edge3);
+        for (int i = 0; i < 3; i++)
+        {
+            Edge edge = createEdge(&f, f.vertices[i], f.vertices[(i + 1) % 3], unique);
+            
+            if (unique)
+                edges.push_back(edge);
+            
+        }
     }
 }
 
-bool ObjReader::isUniqueEdge(Edge* newEdge)
+Edge ObjReader::createEdge(Face *face, Vertex *vertex1, Vertex *vertex2, bool &unique)
 {
+    std::vector<Edge>::iterator it;
+    int index = 0;
+
+    Edge edge;
+    edge.pStartPoint = vertex1;
+    edge.pEndPoint = vertex2;
+
+    if (isUniqueEdge(&edge, index))
+    {
+        edge.faces.push_back(face);
+        unique = true;
+    }
+    else
+    {
+        // Search the existing edge and add the face
+        unique = false;
+        it = edges.begin();
+        std::advance(it, index);
+        (*it).faces.push_back(face);
+    }
+
+    return edge;
+}
+
+void ObjReader::connectEdgesWithFaces()
+{
+    Face *face1, *face2;
+    bool face1Found = false;
+
+    for (Edge edge : edges)
+    {
+        face1Found = false;
+        for (Face face : faces)
+        {
+            if (!face1Found && face.isEdgeInFace(&edge))
+            {
+                face1 = &face;
+                face1Found = true;
+            }
+            else if (face.isEdgeInFace(&edge))
+            {
+                face2 = &face;
+                break;
+            }
+        }
+    }
+}
+
+bool ObjReader::isUniqueEdge(Edge* newEdge, int &index)
+{
+    index = 0;
     for (Edge edge : edges)
     {
         if (edge == *newEdge)
             return false;
+        
+        index++;
     }
 
     return true;

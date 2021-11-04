@@ -1,6 +1,8 @@
 #ifndef EDGE_H
 #define EDGE_H
 
+#include <vector>
+
 #include "Vertex.hpp"
 #include "Face.hpp"
 
@@ -9,11 +11,12 @@ class Face;
 class Edge
 {
 private:
-    /* data */
+    
 public:
     Vertex* pStartPoint;
     Vertex* pEndPoint;
 
+    std::vector<Face*> faces;
     Face* leftFace;
     Face* rightFace;
 

@@ -15,6 +15,7 @@ private:
 public:
     std::vector<Vertex*> vertices;
     std::vector<Edge*> edges;
+    bool isEdgeInFace(Edge* edge);
 
     Face(/* args */);
     ~Face();
