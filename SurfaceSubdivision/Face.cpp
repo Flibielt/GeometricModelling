@@ -62,3 +62,23 @@ void Face::calculateCenter()
     center.point.y /= vertices.size();
     center.point.z /= vertices.size();
 }
+
+Vertex* Face::getThirdVertex(Edge* edge)
+{
+    Vertex *foundVertex;
+
+    for (int i = 0; i< vertices.size(); i++)
+        if (*vertices[i] != *(edge->pStartPoint) && *vertices[i] != *(edge->pEndPoint))
+            foundVertex = vertices[i];
+    
+    return foundVertex;
+}
+
+int Face::getVertexIndex(Vertex *vertex)
+{
+    for (int index = 0; index < vertices.size(); index++)
+        if (*vertices[index] == *vertex)
+            return index;
+    
+    return -1;
+}
