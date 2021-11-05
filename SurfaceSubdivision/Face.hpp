@@ -5,17 +5,21 @@
 
 #include "Edge.hpp"
 #include "Vertex.hpp"
+#include "MathUtil.hpp"
 
 class Edge;
 
 class Face
 {
 private:
-    /* data */
+    Vertex center;
+
+    void calculateCenter();
 public:
     std::vector<Vertex*> vertices;
     std::vector<Edge*> edges;
     bool isEdgeInFace(Edge* edge);
+    void sortVertices();
 
     Face(/* args */);
     ~Face();
