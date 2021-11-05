@@ -15,6 +15,9 @@ public:
 
     bool operator==(const Vertex& v1);
     bool operator!=(const Vertex& v1);
+
+    Vertex operator+=(const Vertex& v1);
+    Vertex operator-=(const Vertex& v1);
 };
 
 #endif
