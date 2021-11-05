@@ -11,7 +11,7 @@ class Face;
 class Edge
 {
 private:
-    
+    Vertex center;
 public:
     Vertex* pStartPoint;
     Vertex* pEndPoint;
@@ -28,6 +28,9 @@ public:
 
     Edge(/* args */);
     ~Edge();
+
+    void calculateCenter();
+    bool containsVertices(Vertex *v1, Vertex *v2);
 
     bool operator==(const Edge& other);
     bool operator!=(const Edge& other);
