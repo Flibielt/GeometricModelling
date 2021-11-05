@@ -20,12 +20,13 @@ private:
 
     Vertex parseVertex(std::string line);
     Face parseFace(std::string line);
-    Edge createEdge(Face *face, Vertex *vertex1, Vertex *vertex2, bool &unique);
+    Edge createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique);
+    Edge* findEdge(Vertex *v1, Vertex *v2);
 
     bool isUniqueEdge(Edge* newEdge, int &index);
     void createEdges();
-    void connectEdgesWithFaces();
-    void connectEdgeWithFace(Edge *edge, Face *face);
+    void setEdgeFaces();
+    void setEdgeTraverses();
 public:
     ObjReader(/* args */);
     ~ObjReader();

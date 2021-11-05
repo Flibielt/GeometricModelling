@@ -40,7 +40,11 @@ void ObjReader::readFile(std::string fileName)
     
     file.close();
 
+    
+
     createEdges();
+    setEdgeFaces();
+    setEdgeTraverses();
 }
 
 
@@ -111,11 +115,11 @@ void ObjReader::createEdges()
     int index;
     bool unique;
 
-    for (Face f : faces)
+    for (int faceIndex = 0; faceIndex < faces.size(); faceIndex++)
     {
         for (int i = 0; i < 3; i++)
         {
-            Edge edge = createEdge(&f, f.vertices[i], f.vertices[(i + 1) % 3], unique);
+            Edge edge = createEdge(faces[faceIndex], faces[faceIndex].vertices[i], faces[faceIndex].vertices[(i + 1) % 3], unique);
             
             if (unique)
                 edges.push_back(edge);
@@ -124,7 +128,7 @@ void ObjReader::createEdges()
     }
 }
 
-Edge ObjReader::createEdge(Face *face, Vertex *vertex1, Vertex *vertex2, bool &unique)
+Edge ObjReader::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique)
 {
     std::vector<Edge>::iterator it;
     int index = 0;
@@ -135,7 +139,7 @@ Edge ObjReader::createEdge(Face *face, Vertex *vertex1, Vertex *vertex2, bool &u
 
     if (isUniqueEdge(&edge, index))
     {
-        edge.faces.push_back(face);
+        edge.faces.push_back(&face);
         unique = true;
     }
     else
@@ -144,48 +148,82 @@ Edge ObjReader::createEdge(Face *face, Vertex *vertex1, Vertex *vertex2, bool &u
         unique = false;
         it = edges.begin();
         std::advance(it, index);
-        (*it).faces.push_back(face);
+        (*it).faces.push_back(&face);
     }
 
     return edge;
 }
 
-void ObjReader::connectEdgesWithFaces()
+void ObjReader::setEdgeFaces()
 {
-    Face *face1, *face2;
-    bool face1Found = false;
+    Vertex *thirdVertex;
+    float dotProduct;
+    int index;
 
-    for (Edge edge : edges)
+    for (int i = 0; i < edges.size(); i++)
     {
-        face1Found = false;
-        for (Face face : faces)
+        index = i;
+        thirdVertex = edges[i].faces[0]->getThirdVertex(&edges[i]);
+        dotProduct = (thirdVertex->point.x - edges[i].pStartPoint->point.x) * 
+        (edges[i].pEndPoint->point.y - edges[i].pStartPoint->point.y) * (edges[i].pEndPoint->point.z - edges[i].pStartPoint->point.z) - 
+                    (edges[i].pEndPoint->point.x - edges[i].pStartPoint->point.x) * (thirdVertex->point.y - edges[i].pStartPoint->point.y) * (edges[i].pEndPoint->point.z - edges[i].pStartPoint->point.z) - 
+                    (edges[i].pEndPoint->point.x - edges[i].pStartPoint->point.x) * (edges[i].pEndPoint->point.y - edges[i].pStartPoint->point.y) * (thirdVertex->point.z - edges[i].pStartPoint->point.z);
+        /*
+        if (dotProduct <= 0)
         {
-            if (!face1Found && face.isEdgeInFace(&edge))
-            {
-                face1 = &face;
-                face1Found = true;
-            }
-            else if (face.isEdgeInFace(&edge))
-            {
-                face2 = &face;
-                break;
-            }
+            edges[i].leftFace = &faces[0];
+            edges[i].rightFace = &faces[1];
         }
+        else
+        {
+            edges[i].leftFace = &faces[1];
+            edges[i].rightFace = &faces[0];
+        }
+        */
+        edges[i].leftFace = edges[i].faces[0];
+        edges[i].rightFace = edges[i].faces[1];
+    }
+}
+
+void ObjReader::setEdgeTraverses()
+{
+    int vertexIndex;
+    Edge *foundEdge;
+
+    for (int i = 0; i < edges.size(); i++)
+    {
+        vertexIndex = edges[i].leftFace->getVertexIndex(edges[i].pStartPoint);
+        edges[i].leftTraversePredecessor = findEdge(edges[i].leftFace->vertices[(vertexIndex - 1 + 3) % 3], edges[i].leftFace->vertices[vertexIndex]);
+        edges[i].leftTraverseSuccessor = findEdge(edges[i].leftFace->vertices[(vertexIndex + 1) % 3], edges[i].leftFace->vertices[(vertexIndex + 2) % 3]);
+
+        vertexIndex = edges[i].rightFace->getVertexIndex(edges[i].pEndPoint);
+        edges[i].rightTraversePredecessor = findEdge(edges[i].rightFace->vertices[(vertexIndex - 1 + 3) % 3], edges[i].rightFace->vertices[vertexIndex]);
+        edges[i].rightTraverseSuccessor = findEdge(edges[i].rightFace->vertices[(vertexIndex + 1) % 3], edges[i].rightFace->vertices[(vertexIndex + 2) % 3]);
     }
 }
 
 bool ObjReader::isUniqueEdge(Edge* newEdge, int &index)
 {
     index = 0;
-    for (Edge edge : edges)
+    for (int i = 0; i < edges.size(); i++)
     {
-        if (edge == *newEdge)
+        if (edges[i] == *newEdge)
             return false;
         
         index++;
     }
 
     return true;
+}
+
+Edge* ObjReader::findEdge(Vertex *v1, Vertex *v2)
+{
+    Edge *foundEdge;
+    for (int i = 0; i < edges.size(); i++)
+        if (edges[i].containsVertices(v1, v2))
+            foundEdge = &edges[i];
+    
+    return foundEdge;
 }
 
 std::vector<Vertex> ObjReader::getVertices()
