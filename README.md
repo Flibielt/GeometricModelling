@@ -126,11 +126,31 @@ Other tables:
 ### Schemes
 http://multires.caltech.edu/pubs/sig00notes.pdf
 
-* Loop scheme
-* Modified butterfly scheme
+In this project the Loop and the modified butterfly schemes will be implemented. 
 
+#### **Loop scheme**
+The Loop scheme is a approximating scheme. 
+After subdivision the vertices will be moved to an approximated position, so the surface will be smoother.
 
-File format:
+![Loop scheme](/data/loop-scheme.png)
+
+#### **Modified butterfly scheme**
+
+The modified butterfly is an interpolating scheme, so no vertex will be moved after they were generated.
+
+Each will be split into two, the split point will be calculated according to the scheme:
+
+![Modified butterfly scheme](/data/modified-butterfly-scheme.png)
+
+The calculated vertices will be saved to the old ones.
+
+After that generate new faces using the old and new vertices. From 1 face will be generated 4 new faces.
+3 using 1 old vertex and 2 new vertices and 1 face with the new vertices. 
+After the generation the old faces will be deleted.
+
+![Modified butterfly scheme new faces](/data/butterfly_new_faces.png)
+
+### File formats:
 
 * obj: recommended
 * x3d: successor of vml
