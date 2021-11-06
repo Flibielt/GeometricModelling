@@ -40,13 +40,10 @@ void ObjReader::readFile(std::string fileName)
     
     file.close();
 
-    
-
     createEdges();
     setEdgeFaces();
     setEdgeTraverses();
 }
-
 
 Vertex ObjReader::parseVertex(std::string line)
 {
@@ -79,7 +76,6 @@ Vertex ObjReader::parseVertex(std::string line)
 
     return vertex;
 }
-
 
 Face ObjReader::parseFace(std::string line)
 {
@@ -241,16 +237,13 @@ std::vector<Face> ObjReader::getFaces()
     return faces;
 }
 
-
 int getVertexIndex(std::string vertex)
 {
     int vertexIndex = 0;
     std::size_t index = vertex.find("/");
 
     if (index == std::string::npos)
-    {
         return std::stoi(vertex);
-    }
 
     vertexIndex = std::stoi(vertex.substr(0, index));
     // In the obj files vertex indexes starts with 1

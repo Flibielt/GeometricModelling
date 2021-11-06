@@ -29,13 +29,9 @@ bool Edge::containsVertices(Vertex *v1, Vertex *v2)
 bool Edge::operator==(const Edge& other)
 {
     if (this->pEndPoint == other.pEndPoint && this->pStartPoint == other.pStartPoint)
-    {
         return true;
-    }
     else if (this->pStartPoint == other.pEndPoint && this->pEndPoint == other.pStartPoint)
-    {
         return true;
-    }
     
     return false;
 }
