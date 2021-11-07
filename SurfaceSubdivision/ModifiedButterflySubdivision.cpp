@@ -1,5 +1,14 @@
 #include "ModifiedButterflySubdivision.hpp"
 
+ModifiedButterflySubdivision::ModifiedButterflySubdivision(/* args */)
+{
+}
+
+ModifiedButterflySubdivision::~ModifiedButterflySubdivision()
+{
+}
+
+
 void ModifiedButterflySubdivision::subdivide()
 {
     splitEdges();
@@ -137,7 +146,7 @@ void ModifiedButterflySubdivision::setEdgeFaces()
         (edges[i].pEndPoint->point.y - edges[i].pStartPoint->point.y) * (edges[i].pEndPoint->point.z - edges[i].pStartPoint->point.z) - 
                     (edges[i].pEndPoint->point.x - edges[i].pStartPoint->point.x) * (thirdVertex->point.y - edges[i].pStartPoint->point.y) * (edges[i].pEndPoint->point.z - edges[i].pStartPoint->point.z) - 
                     (edges[i].pEndPoint->point.x - edges[i].pStartPoint->point.x) * (edges[i].pEndPoint->point.y - edges[i].pStartPoint->point.y) * (thirdVertex->point.z - edges[i].pStartPoint->point.z);
-        
+
         edges[i].leftFace = edges[i].faces[0];
         edges[i].rightFace = edges[i].faces[1];
     }

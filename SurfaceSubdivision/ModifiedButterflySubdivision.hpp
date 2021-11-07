@@ -60,13 +60,4 @@ public:
     void subdivide();
 };
 
-ModifiedButterflySubdivision::ModifiedButterflySubdivision(/* args */)
-{
-}
-
-ModifiedButterflySubdivision::~ModifiedButterflySubdivision()
-{
-}
-
-
 #endif
