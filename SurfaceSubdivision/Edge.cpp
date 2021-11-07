@@ -3,6 +3,18 @@
 
 Edge::Edge(/* args */)
 {
+    this->pStartPoint = nullptr;
+    this->pEndPoint = nullptr;
+    this->generatedVertex = nullptr;
+
+    this->leftFace = nullptr;
+    this->rightFace = nullptr;
+
+    this->leftTraversePredecessor = nullptr;
+    this->leftTraverseSuccessor = nullptr;
+
+    this->rightTraversePredecessor = nullptr;
+    this->rightTraverseSuccessor = nullptr;
 }
 
 Edge::~Edge()
