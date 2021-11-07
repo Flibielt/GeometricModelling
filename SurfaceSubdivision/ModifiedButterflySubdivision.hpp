@@ -10,6 +10,9 @@
 class ModifiedButterflySubdivision
 {
 private:
+    std::vector<Face> newFaces;
+    std::vector<Edge> newEdges;
+
     /**
      * @brief Create new edges.
      * 
@@ -34,6 +37,18 @@ private:
      * Delete the old edges, then create new edges from the newly created faces.
      */
     void createEdges();
+
+    /**
+     * @brief Clear the old faces and edges
+     * 
+     */
+    void clear();
+
+    Edge createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique);
+    Edge* findEdge(Vertex *v1, Vertex *v2);
+    bool isUniqueEdge(Edge* newEdge, int &index);
+    void setEdgeFaces();
+    void setEdgeTraverses();
 public:
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;
