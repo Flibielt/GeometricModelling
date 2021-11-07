@@ -13,20 +13,31 @@ class Edge
 private:
     Vertex center;
 public:
-    Vertex* pStartPoint;
-    Vertex* pEndPoint;
+    Vertex *pStartPoint;
+    Vertex *pEndPoint;
+    Vertex *generatedVertex;
 
     std::vector<Face*> faces;
-    Face* leftFace;
-    Face* rightFace;
+    Face *leftFace;
+    Face *rightFace;
 
-    Edge* leftTraversePredecessor;
-    Edge* leftTraverseSuccessor;
+    Edge *leftTraversePredecessor;
+    Edge *leftTraverseSuccessor;
 
-    Edge* rightTraversePredecessor;
-    Edge* rightTraverseSuccessor;
+    Edge *rightTraversePredecessor;
+    Edge *rightTraverseSuccessor;
 
+    /**
+     * @brief Get vertices for subdivision. These vertices will be multiplied by 1/8.
+     * 
+     * @return std::vector<Vertex*> The vertices
+     */
     std::vector<Vertex*> get1per8Vertices();
+    /**
+     * @brief Get vertices for subdivision. These vertices will be multiplied by 1/16.
+     * 
+     * @return std::vector<Vertex*> The vertices
+     */
     std::vector<Vertex*> get1per16Vertices();
 
     Edge(/* args */);
