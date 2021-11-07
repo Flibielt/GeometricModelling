@@ -12,6 +12,12 @@ ModifiedButterflySubdivision::~ModifiedButterflySubdivision()
 void ModifiedButterflySubdivision::subdivide()
 {
     splitEdges();
+    for (int i = 0; i < edges.size(); i++)
+        for (int j = 0; j < faces.size(); j++)
+            for (int x = 0; x < faces[j].edges.size(); x++)
+                if (*faces[j].edges[x] == edges[i])
+                    faces[j].edges[x] = &edges[i];
+    
     createNewFaces();
 
     clear();
