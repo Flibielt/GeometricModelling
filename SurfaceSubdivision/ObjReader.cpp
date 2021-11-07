@@ -43,6 +43,8 @@ void ObjReader::readFile(std::string fileName)
     createEdges();
     setEdgeFaces();
     setEdgeTraverses();
+
+    setEdgesForFaces();
 }
 
 Vertex ObjReader::parseVertex(std::string line)
@@ -136,7 +138,6 @@ Edge ObjReader::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &u
     if (isUniqueEdge(&edge, index))
     {
         edge.faces.push_back(&face);
-        face.edges.push_back(&edge);
         unique = true;
     }
     else
@@ -146,7 +147,6 @@ Edge ObjReader::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &u
         it = edges.begin();
         std::advance(it, index);
         (*it).faces.push_back(&face);
-        face.edges.push_back(&(*it));
     }
 
     return edge;
@@ -222,6 +222,18 @@ Edge* ObjReader::findEdge(Vertex *v1, Vertex *v2)
             foundEdge = &edges[i];
     
     return foundEdge;
+}
+
+void ObjReader::setEdgesForFaces()
+{
+    Edge *edge;
+    for (int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++)
+    {
+        edge = &edges[edgeIndex];
+
+        edge->leftFace->edges.push_back(edge);
+        edge->rightFace->edges.push_back(edge);
+    }
 }
 
 std::vector<Vertex> ObjReader::getVertices()

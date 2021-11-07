@@ -27,6 +27,7 @@ private:
     void createEdges();
     void setEdgeFaces();
     void setEdgeTraverses();
+    void setEdgesForFaces();
 public:
     ObjReader(/* args */);
     ~ObjReader();
