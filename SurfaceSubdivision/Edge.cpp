@@ -16,6 +16,11 @@ void Edge::calculateCenter()
     center.point.z = (pStartPoint->point.z + pEndPoint->point.z) / 2;
 }
 
+bool Edge::containsVertex(Vertex *v)
+{
+    return *(this->pStartPoint) == *v || *(this->pEndPoint) == *v;
+}
+
 bool Edge::containsVertices(Vertex *v1, Vertex *v2)
 {
     if (*(this->pStartPoint) == *v1 && *(this->pEndPoint) == *v2)

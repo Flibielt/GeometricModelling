@@ -44,6 +44,7 @@ public:
     ~Edge();
 
     void calculateCenter();
+    bool containsVertex(Vertex *v);
     bool containsVertices(Vertex *v1, Vertex *v2);
 
     bool operator==(const Edge& other);
