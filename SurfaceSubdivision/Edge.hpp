@@ -26,6 +26,9 @@ public:
     Edge* rightTraversePredecessor;
     Edge* rightTraverseSuccessor;
 
+    std::vector<Vertex*> get1per8Vertices();
+    std::vector<Vertex*> get1per16Vertices();
+
     Edge(/* args */);
     ~Edge();
 
