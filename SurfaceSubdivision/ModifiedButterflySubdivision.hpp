@@ -49,6 +49,7 @@ private:
     bool isUniqueEdge(Edge* newEdge, int &index);
     void setEdgeFaces();
     void setEdgeTraverses();
+    void setEdgesForFaces();
 public:
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;

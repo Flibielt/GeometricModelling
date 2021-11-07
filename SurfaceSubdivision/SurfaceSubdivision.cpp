@@ -18,6 +18,7 @@
 #include "Edge.hpp"
 #include "Face.hpp"
 #include "ObjReader.hpp"
+#include "ModifiedButterflySubdivision.hpp"
 
 
 static std::vector<glm::vec3> myPoints =
@@ -40,6 +41,7 @@ GLuint VAO;
 GLuint renderingProgram;
 
 ObjReader objReader;
+ModifiedButterflySubdivision modifiedButterfly;
 
 void updateData()
 {
@@ -94,6 +96,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindVertexArray(VAO);
 
 	int start = 0;
+	int size = edges.size();
 	for (int i = 0; i < edges.size(); i++)
 	{
 		colorLoc = glGetUniformLocation(renderingProgram, "color");
@@ -119,7 +122,15 @@ void display(GLFWwindow* window, double currentTime) {
 int main(void) {
 
 	objReader.readFile("bunny.obj");
-	edges = objReader.getEdges();
+	//edges = objReader.getEdges();
+
+	modifiedButterfly.vertices = objReader.getVertices();
+	modifiedButterfly.edges = objReader.getEdges();
+	modifiedButterfly.faces = objReader.getFaces();
+	modifiedButterfly.subdivide();
+
+	edges = modifiedButterfly.edges;
+	//edges = objReader.getEdges();
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
@@ -127,7 +138,7 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Surface Subversion", NULL, NULL);
-	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
 	glfwMakeContextCurrent(window);
 

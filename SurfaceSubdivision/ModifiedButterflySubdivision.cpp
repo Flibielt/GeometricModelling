@@ -1,5 +1,7 @@
 #include "ModifiedButterflySubdivision.hpp"
 
+#include <iostream>
+
 ModifiedButterflySubdivision::ModifiedButterflySubdivision(/* args */)
 {
 }
@@ -20,17 +22,33 @@ void ModifiedButterflySubdivision::subdivide()
     
     createNewFaces();
 
-    clear();
+    int oldEdgeCount, newEdgeCount;
+    oldEdgeCount = edges.size();
 
+    clear();
+    
+    
     createEdges();
+    newEdgeCount = edges.size();
+    std::cout << "Old edge count: " << oldEdgeCount << std::endl << "New edge count: " << newEdgeCount << std::endl;
+    int i = 0;
 }
 
 void ModifiedButterflySubdivision::clear()
 {
+    int faceCount, newFaceCount;
+    faceCount = faces.size();
+    newFaceCount = newFaces.size();
     faces.clear();
     edges.clear();
 
-    faces = newFaces;
+    
+    for (int i = 0; i < newFaces.size(); i++)
+        faces.push_back(newFaces[i]);
+    
+    
+    newFaces.clear();
+    
 }
 
 void ModifiedButterflySubdivision::splitEdges()
@@ -52,20 +70,22 @@ void ModifiedButterflySubdivision::splitEdges()
 
         for (int j = 0; j < vertices1per8.size(); j++)
         {
-            vertex.point.x += vertices1per8[j]->point.x / 8;
-            vertex.point.y += vertices1per8[j]->point.y / 8;
-            vertex.point.z += vertices1per8[j]->point.z / 8;
+            vertex.point.x += vertices1per8[j]->point.x / (float)8;
+            vertex.point.y += vertices1per8[j]->point.y / (float)8;
+            vertex.point.z += vertices1per8[j]->point.z / (float)8;
         }
 
         for (int j = 0; j < vertices1per16.size(); j++)
         {
-            vertex.point.x += vertices1per16[j]->point.x / 16;
-            vertex.point.y += vertices1per16[j]->point.y / 16;
-            vertex.point.z += vertices1per16[j]->point.z / 16;
+            vertex.point.x += vertices1per16[j]->point.x / (float)16;
+            vertex.point.y += vertices1per16[j]->point.y / (float)16;
+            vertex.point.z += vertices1per16[j]->point.z / (float)16;
         }
 
+        vertex.generated = true;
+
         vertices.push_back(vertex);
-        edge->generatedVertex = &vertex;
+        edge->generatedVertex = &vertices[vertices.size() - 1];
     }
 }
 
@@ -91,31 +111,35 @@ void ModifiedButterflySubdivision::createNewFaces()
             newFace.sortVertices();
             newFaces.push_back(newFace);
         }
+
+        // Create a new face using the 3 generated points
+        Face newFace;
+        for (int edgeIndex = 0; edgeIndex < face->edges.size(); edgeIndex++)
+            newFace.vertices.push_back(faces[i].edges[edgeIndex]->generatedVertex);
+        newFace.sortVertices();
+        newFaces.push_back(newFace);
     }
 }
 
 void ModifiedButterflySubdivision::createEdges()
 {
-    std::vector<Edge>::iterator it;
     int index;
     bool unique;
 
-    for (int faceIndex = 0; faceIndex < faces.size(); faceIndex++)
+    for (int i = 0; i < faces.size(); i++)
     {
-        for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
         {
-            Edge edge = createEdge(faces[faceIndex], faces[faceIndex].vertices[i], faces[faceIndex].vertices[(i + 1) % 3], unique);
-            
+            Edge edge = createEdge(faces[i], faces[i].vertices[j], faces[i].vertices[(j + 1) % 3], unique);
+
             if (unique)
                 edges.push_back(edge);
-            
         }
     }
 }
 
 Edge ModifiedButterflySubdivision::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique)
 {
-    std::vector<Edge>::iterator it;
     int index = 0;
 
     Edge edge;
@@ -125,17 +149,13 @@ Edge ModifiedButterflySubdivision::createEdge(Face &face, Vertex *vertex1, Verte
     if (isUniqueEdge(&edge, index))
     {
         edge.faces.push_back(&face);
-        face.edges.push_back(&edge);
         unique = true;
     }
     else
     {
         // Search the existing edge and add the face
         unique = false;
-        it = edges.begin();
-        std::advance(it, index);
-        (*it).faces.push_back(&face);
-        face.edges.push_back(&(*it));
+        edges[index].faces.push_back(&face);
     }
 
     return edge;
@@ -200,4 +220,16 @@ Edge* ModifiedButterflySubdivision::findEdge(Vertex *v1, Vertex *v2)
             foundEdge = &edges[i];
     
     return foundEdge;
+}
+
+void ModifiedButterflySubdivision::setEdgesForFaces()
+{
+    Edge *edge;
+    for (int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++)
+    {
+        edge = &edges[edgeIndex];
+
+        edge->leftFace->edges.push_back(edge);
+        edge->rightFace->edges.push_back(edge);
+    }
 }
