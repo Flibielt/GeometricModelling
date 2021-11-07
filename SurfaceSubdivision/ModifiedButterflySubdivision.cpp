@@ -50,9 +50,9 @@ void ModifiedButterflySubdivision::splitEdges()
 
         for (int j = 0; j < vertices1per16.size(); j++)
         {
-            vertex.point.x += (1 / 16) * vertices1per8[j]->point.x;
-            vertex.point.y += (1 / 16) * vertices1per8[j]->point.y;
-            vertex.point.z += (1 / 16) * vertices1per8[j]->point.z;
+            vertex.point.x += (1 / 16) * vertices1per16[j]->point.x;
+            vertex.point.y += (1 / 16) * vertices1per16[j]->point.y;
+            vertex.point.z += (1 / 16) * vertices1per16[j]->point.z;
         }
 
         vertices.push_back(vertex);
