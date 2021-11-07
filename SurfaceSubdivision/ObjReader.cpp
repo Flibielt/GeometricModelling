@@ -136,6 +136,7 @@ Edge ObjReader::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &u
     if (isUniqueEdge(&edge, index))
     {
         edge.faces.push_back(&face);
+        face.edges.push_back(&edge);
         unique = true;
     }
     else
@@ -145,6 +146,7 @@ Edge ObjReader::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &u
         it = edges.begin();
         std::advance(it, index);
         (*it).faces.push_back(&face);
+        face.edges.push_back(&(*it));
     }
 
     return edge;
