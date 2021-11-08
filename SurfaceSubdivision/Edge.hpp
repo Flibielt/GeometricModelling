@@ -16,6 +16,7 @@ public:
     Vertex *pStartPoint;
     Vertex *pEndPoint;
     Vertex *generatedVertex;
+    int startPointIndex, endPointIndex, generatedVertexIndex;
 
     std::vector<Face*> faces;
     Face *leftFace;
