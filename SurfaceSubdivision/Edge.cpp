@@ -15,6 +15,8 @@ Edge::Edge(/* args */)
 
     this->rightTraversePredecessor = nullptr;
     this->rightTraverseSuccessor = nullptr;
+
+    generatedVertexIndex = -1;
 }
 
 Edge::~Edge()

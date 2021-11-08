@@ -14,11 +14,17 @@ ModifiedButterflySubdivision::~ModifiedButterflySubdivision()
 void ModifiedButterflySubdivision::subdivide()
 {
     splitEdges();
+
     for (int i = 0; i < edges.size(); i++)
         for (int j = 0; j < faces.size(); j++)
             for (int x = 0; x < faces[j].edges.size(); x++)
                 if (*faces[j].edges[x] == edges[i])
+                {
                     faces[j].edges[x] = &edges[i];
+                    faces[j].edges[x]->pStartPoint = edges[i].pStartPoint;
+                    faces[j].edges[x]->pEndPoint = edges[i].pEndPoint;
+                    faces[j].edges[x]->generatedVertex = edges[i].generatedVertex;
+                }
     
     createNewFaces();
 
@@ -29,6 +35,11 @@ void ModifiedButterflySubdivision::subdivide()
     
     
     createEdges();
+
+    setEdgeFaces();
+    setEdgeTraverses();
+    setEdgesForFaces();
+
     newEdgeCount = edges.size();
     std::cout << "Old edge count: " << oldEdgeCount << std::endl << "New edge count: " << newEdgeCount << std::endl;
     int i = 0;
@@ -68,6 +79,14 @@ void ModifiedButterflySubdivision::splitEdges()
         vertices1per8 = edge->get1per8Vertices();
         vertices1per16 = edge->get1per16Vertices();
 
+        vertex.point.x += edge->pStartPoint->point.x / (float)2;
+        vertex.point.y += edge->pStartPoint->point.y / (float)2;
+        vertex.point.z += edge->pStartPoint->point.z / (float)2;
+
+        vertex.point.x += edge->pEndPoint->point.x / (float)2;
+        vertex.point.y += edge->pEndPoint->point.y / (float)2;
+        vertex.point.z += edge->pEndPoint->point.z / (float)2;
+
         for (int j = 0; j < vertices1per8.size(); j++)
         {
             vertex.point.x += vertices1per8[j]->point.x / (float)8;
@@ -77,36 +96,52 @@ void ModifiedButterflySubdivision::splitEdges()
 
         for (int j = 0; j < vertices1per16.size(); j++)
         {
-            vertex.point.x += vertices1per16[j]->point.x / (float)16;
-            vertex.point.y += vertices1per16[j]->point.y / (float)16;
-            vertex.point.z += vertices1per16[j]->point.z / (float)16;
+            vertex.point.x -= vertices1per16[j]->point.x / (float)16;
+            vertex.point.y -= vertices1per16[j]->point.y / (float)16;
+            vertex.point.z -= vertices1per16[j]->point.z / (float)16;
         }
 
         vertex.generated = true;
 
         vertices.push_back(vertex);
         edge->generatedVertex = &vertices[vertices.size() - 1];
+        edge->generatedVertexIndex = vertices.size() - 1;
+
+        int index;
+        findVertex(edge->pStartPoint, index);
+        edge->startPointIndex = index;
+
+        findVertex(edge->pEndPoint, index);
+        edge->endPointIndex = index;
     }
 }
 
 void ModifiedButterflySubdivision::createNewFaces()
 {
-    Face *face = nullptr;
+    Vertex *vertex;
 
     for (int i = 0; i < faces.size(); i++)
     {
-        face = &faces[i];
+        //face = &faces[i];
 
         // Create new faces using one old vertex and two new vertices
-        for (int vertexIndex = 0; vertexIndex < face->vertices.size(); vertexIndex++)
+        for (int vertexIndex = 0; vertexIndex < faces[i].vertices.size(); vertexIndex++)
         {
             Face newFace;
-            newFace.vertices.push_back(face->vertices[vertexIndex]);
+            vertex = faces[i].vertices[vertexIndex];
+            newFace.vertices.push_back(findVertex(vertex));
+            vertex = nullptr;
 
             // Find the 2 edges which contains the current old vertex, then add the generated vertices
-            for (int edgeIndex = 0; edgeIndex < face->edges.size(); edgeIndex++)
-                if (face->edges[edgeIndex]->containsVertex(face->vertices[vertexIndex]))
-                    newFace.vertices.push_back(face->edges[edgeIndex]->generatedVertex);
+            for (int edgeIndex = 0; edgeIndex < faces[i].edges.size(); edgeIndex++)
+                if (faces[i].edges[edgeIndex]->containsVertex(faces[i].vertices[vertexIndex]))
+                {
+                    //vertex = face->edges[edgeIndex]->generatedVertex;
+                    vertex = &vertices[faces[i].edges[edgeIndex]->generatedVertexIndex];
+                    newFace.vertices.push_back(findVertex(vertex));
+
+                    vertex = nullptr;
+                }
             
             newFace.sortVertices();
             newFaces.push_back(newFace);
@@ -114,8 +149,12 @@ void ModifiedButterflySubdivision::createNewFaces()
 
         // Create a new face using the 3 generated points
         Face newFace;
-        for (int edgeIndex = 0; edgeIndex < face->edges.size(); edgeIndex++)
-            newFace.vertices.push_back(faces[i].edges[edgeIndex]->generatedVertex);
+        for (int edgeIndex = 0; edgeIndex < faces[i].edges.size(); edgeIndex++)
+        {
+            //vertex = faces[i].edges[edgeIndex]->generatedVertex,
+            vertex = &vertices[faces[i].edges[edgeIndex]->generatedVertexIndex];
+            newFace.vertices.push_back(findVertex(vertex));
+        }
         newFace.sortVertices();
         newFaces.push_back(newFace);
     }
@@ -232,4 +271,31 @@ void ModifiedButterflySubdivision::setEdgesForFaces()
         edge->leftFace->edges.push_back(edge);
         edge->rightFace->edges.push_back(edge);
     }
+}
+
+Vertex* ModifiedButterflySubdivision::findVertex(Vertex *searched)
+{
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        if (vertices[i] == *searched)
+            return &vertices[i];
+    }
+
+    return nullptr;
+}
+
+Vertex* ModifiedButterflySubdivision::findVertex(Vertex *searched, int &index)
+{
+    index = 0;
+
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        if (vertices[i] == *searched)
+            return &vertices[i];
+        
+        index++;
+    }
+
+    index = -1;
+    return nullptr;
 }
