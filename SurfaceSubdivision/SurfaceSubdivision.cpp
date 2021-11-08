@@ -33,7 +33,10 @@ glm::mat4 view;
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
 
 std::vector<glm::vec3> points;
+std::vector<Vertex> vertices;
 std::vector<Edge> edges;
+std::vector<Face> faces;
+size_t faceSize;
 
 GLuint VBO;
 GLuint VAO;
@@ -53,9 +56,58 @@ void updateData()
 		allPoints.push_back(edge.pEndPoint->point);
 	}
 
+	faceSize = allPoints.size();
+
+	for (Face face :faces)
+	{
+		for (int i = 0; i < face.vertices.size(); i++)
+		{
+			allPoints.push_back(face.vertices[i]->point);
+		}
+	}
+	
+	faceSize = allPoints.size() - faceSize;
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, allPoints.size() * sizeof(glm::vec3), allPoints.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    float cameraSpeed = 2.5 * deltaTime; 
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+	{
+		enableMouse = !enableMouse;
+		if (enableMouse)
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+		else
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_NORMAL);
+	}
+	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+	{
+		modifiedButterfly.vertices = vertices;
+		modifiedButterfly.edges = edges;
+		modifiedButterfly.faces = faces;
+		modifiedButterfly.subdivide();
+
+		vertices = modifiedButterfly.vertices;
+		edges = modifiedButterfly.edges;
+		faces = modifiedButterfly.faces;
+
+		updateData();
+	}
 }
 
 void init(GLFWwindow* window) {
@@ -87,6 +139,7 @@ void cleanUpScene()
 }
 
 void display(GLFWwindow* window, double currentTime) {
+	int start, size;
 	unsigned int colorLoc;
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
@@ -94,9 +147,9 @@ void display(GLFWwindow* window, double currentTime) {
 	glUseProgram(renderingProgram);
 
 	glBindVertexArray(VAO);
-
-	int start = 0;
-	int size = edges.size();
+	
+	start = 0;
+	size = edges.size();
 	for (int i = 0; i < edges.size(); i++)
 	{
 		colorLoc = glGetUniformLocation(renderingProgram, "color");
@@ -122,15 +175,10 @@ void display(GLFWwindow* window, double currentTime) {
 int main(void) {
 
 	objReader.readFile("bunny.obj");
-	//edges = objReader.getEdges();
-
-	modifiedButterfly.vertices = objReader.getVertices();
-	modifiedButterfly.edges = objReader.getEdges();
-	modifiedButterfly.faces = objReader.getFaces();
-	modifiedButterfly.subdivide();
-
-	edges = modifiedButterfly.edges;
-	//edges = objReader.getEdges();
+	
+	vertices = objReader.getVertices();
+	edges = objReader.getEdges();
+	faces = objReader.getFaces();
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
