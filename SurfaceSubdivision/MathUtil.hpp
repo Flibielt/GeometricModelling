@@ -1,18 +1,19 @@
 #ifndef MATH_UTIL_H
 #define MATH_UTIL_H
 
+#include "data.hpp"
 #include "Vertex.hpp"
 
 /**
  * @brief Compare the vertices by angle and distance
  * 
  * @param center The center vertex
- * @param v1 The first vertex
- * @param v2 The seconf vertex
+ * @param v1 The first vertex index
+ * @param v2 The seconf vertex index
  * @return true The first vertex order is less than the second vertex
  * @return false The first vertex order is more than the second vertex
  */
-bool comparePointOrder(Vertex *center, Vertex *v1, Vertex *v2);
+bool comparePointOrder(Vertex *center, int vertexIndex1, int vertexIndex2);
 
 /**
  * @brief Calculate the distance of the vertices

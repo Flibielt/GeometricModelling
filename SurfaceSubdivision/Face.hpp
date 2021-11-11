@@ -16,13 +16,14 @@ private:
 
     void calculateCenter();
 public:
-    std::vector<Vertex*> vertices;
-    std::vector<Edge*> edges;
+    std::vector<int> verticesIndex;
+    std::vector<int> edgesIndex;
     bool isEdgeInFace(Edge* edge);
+    bool isEdgeInFace(int index);
     void sortVertices();
 
-    Vertex* getThirdVertex(Edge* edge);
-    int getVertexIndex(Vertex *vertex);
+    int getThirdVertex(Edge* edge);
+    int getThirdVertex(int index);
 
     Face(/* args */);
     ~Face();

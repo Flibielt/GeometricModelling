@@ -55,19 +55,15 @@ void updateData()
 
 	for (Edge edge : edges)
 	{
-		allPoints.push_back(edge.pStartPoint->point);
-		allPoints.push_back(edge.pEndPoint->point);
+		allPoints.push_back(vertices[edge.startVertexIndex].point);
+		allPoints.push_back(vertices[edge.endVertexIndex].point);
 	}
 
 	faceSize = allPoints.size();
 
 	for (Face face :faces)
-	{
-		for (int i = 0; i < face.vertices.size(); i++)
-		{
-			allPoints.push_back(face.vertices[i]->point);
-		}
-	}
+		for (int i = 0; i < face.verticesIndex.size(); i++)
+			allPoints.push_back(vertices[face.verticesIndex[i]].point);
 	
 	faceSize = allPoints.size() - faceSize;
 
