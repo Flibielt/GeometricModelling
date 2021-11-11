@@ -20,6 +20,12 @@
 #include "ObjReader.hpp"
 #include "ModifiedButterflySubdivision.hpp"
 
+#include "data.hpp"
+
+// Global variables from data.hpp
+std::vector<Vertex> vertices;
+std::vector<Edge> edges;
+std::vector<Face> faces;
 
 static std::vector<glm::vec3> myPoints =
 {
@@ -33,9 +39,6 @@ glm::mat4 view;
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
 
 std::vector<glm::vec3> points;
-std::vector<Vertex> vertices;
-std::vector<Edge> edges;
-std::vector<Face> faces;
 size_t faceSize;
 
 GLuint VBO;
