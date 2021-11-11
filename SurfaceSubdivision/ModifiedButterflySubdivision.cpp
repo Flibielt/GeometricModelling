@@ -13,7 +13,15 @@ ModifiedButterflySubdivision::~ModifiedButterflySubdivision()
 
 void ModifiedButterflySubdivision::subdivide()
 {
+    int oldEdgeCount, newEdgeCount;
+    int oldVertexCount, newVertexCount;
+
+    oldEdgeCount = edges.size();
+    oldVertexCount = vertices.size();
+
     splitEdges();
+
+    newVertexCount = vertices.size();
 
     for (int i = 0; i < edges.size(); i++)
         for (int j = 0; j < faces.size(); j++)
@@ -25,14 +33,32 @@ void ModifiedButterflySubdivision::subdivide()
                     faces[j].edges[x]->pEndPoint = edges[i].pEndPoint;
                     faces[j].edges[x]->generatedVertex = edges[i].generatedVertex;
                 }
-    
+
+    for (int i = 0; i < faces.size(); i++)
+    {
+        for (int j = 0; j < faces[i].vertices.size(); j++)
+        {
+            Vertex *vertex = nullptr;
+            int index = 0;
+
+            if (i == 134)
+                std::cout << "asd\n";
+
+            vertex = findVertex(faces[i].vertices[j], index);
+            if (vertex == nullptr)
+            {
+                faces[i].vertices[j] = &vertices[faces[i].vertices[j]->index];
+            }
+            else
+            {
+                faces[i].vertices[j] = &vertices[index];
+            }
+        }
+    }
+
     createNewFaces();
 
-    int oldEdgeCount, newEdgeCount;
-    oldEdgeCount = edges.size();
-
-    clear();
-    
+    clear();    
     
     createEdges();
 
@@ -41,7 +67,9 @@ void ModifiedButterflySubdivision::subdivide()
     setEdgesForFaces();
 
     newEdgeCount = edges.size();
+    newVertexCount = vertices.size();
     std::cout << "Old edge count: " << oldEdgeCount << std::endl << "New edge count: " << newEdgeCount << std::endl;
+    std::cout << "Old vertex count: " << oldVertexCount << std::endl << "New vertex count: " << newVertexCount << std::endl;
     int i = 0;
 }
 
@@ -278,7 +306,10 @@ Vertex* ModifiedButterflySubdivision::findVertex(Vertex *searched)
     for (int i = 0; i < vertices.size(); i++)
     {
         if (vertices[i] == *searched)
+        {
+            vertices[i].index = i;
             return &vertices[i];
+        }
     }
 
     return nullptr;
@@ -291,7 +322,10 @@ Vertex* ModifiedButterflySubdivision::findVertex(Vertex *searched, int &index)
     for (int i = 0; i < vertices.size(); i++)
     {
         if (vertices[i] == *searched)
+        {
+            vertices[i].index = i;
             return &vertices[i];
+        }
         
         index++;
     }

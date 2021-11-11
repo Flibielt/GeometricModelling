@@ -12,6 +12,7 @@ private:
 public:
     glm::vec3 point;
     bool generated;
+    int index;
     
     Vertex(/* args */);
     ~Vertex();

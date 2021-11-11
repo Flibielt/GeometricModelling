@@ -97,9 +97,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
 	{
-		modifiedButterfly.vertices = vertices;
-		modifiedButterfly.edges = edges;
-		modifiedButterfly.faces = faces;
 		modifiedButterfly.subdivide();
 
 		vertices = modifiedButterfly.vertices;
@@ -174,11 +171,15 @@ void display(GLFWwindow* window, double currentTime) {
 
 int main(void) {
 
-	objReader.readFile("bunny.obj");
+	objReader.readFile("icos.obj");
 	
 	vertices = objReader.getVertices();
 	edges = objReader.getEdges();
 	faces = objReader.getFaces();
+
+	modifiedButterfly.vertices = vertices;
+	modifiedButterfly.edges = edges;
+	modifiedButterfly.faces = faces;
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
