@@ -7,6 +7,10 @@
 
 #include <vector>
 
+// Needed tp predefine the edge and face class
+class Edge;
+class Face;
+
 extern std::vector<Vertex> vertices;
 extern std::vector<Edge> edges;
 extern std::vector<Face> faces;
