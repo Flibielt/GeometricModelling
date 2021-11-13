@@ -171,10 +171,6 @@ void display(GLFWwindow* window, double currentTime) {
 int main(void) {
 
 	objReader.readFile("icos.obj");
-	
-	vertices = objReader.getVertices();
-	edges = objReader.getEdges();
-	faces = objReader.getFaces();
 
 	modifiedButterfly.vertices = vertices;
 	modifiedButterfly.edges = edges;

@@ -85,8 +85,6 @@ Face ObjReader::parseFace(std::string line)
     std::stringstream text(line);
     std::string segment;
 
-    std::vector<Vertex>::iterator it;
-
     int index = 0;
     int vertexIndex;
     while (std::getline(text, segment, ' '))
@@ -94,11 +92,7 @@ Face ObjReader::parseFace(std::string line)
         if (index > 0)
         {
             vertexIndex = getVertexIndex(segment);
-
-            it = vertices.begin();
-            std::advance(it, vertexIndex);
-
-            face.vertices.push_back(&(*it));
+            face.verticesIndex.push_back(vertexIndex);
         }
 
         index++;
@@ -126,58 +120,47 @@ void ObjReader::createEdges()
     }
 }
 
-Edge ObjReader::createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique)
+Edge ObjReader::createEdge(int faceIndex, int vertex1Index, int vertex2Index, bool &unique)
 {
-    std::vector<Edge>::iterator it;
     int index = 0;
 
     Edge edge;
-    edge.pStartPoint = vertex1;
-    edge.pEndPoint = vertex2;
+    edge.startVertexIndex = vertex1Index;
+    edge.endVertexIndex = vertex2Index;
 
     if (isUniqueEdge(&edge, index))
     {
-        edge.faces.push_back(&face);
+        edge.faces.push_back(index);
         unique = true;
     }
     else
     {
         // Search the existing edge and add the face
         unique = false;
-        it = edges.begin();
-        std::advance(it, index);
-        (*it).faces.push_back(&face);
+        edge.faces.push_back(index);
     }
-
+    
     return edge;
 }
 
 void ObjReader::setEdgeFaces()
 {
-    Vertex *thirdVertex;
+    int thirdVertexIndex;
+    int startPointIndex, endPointIndex;
     float dotProduct;
-    int index;
 
     for (int i = 0; i < edges.size(); i++)
     {
-        index = i;
-        thirdVertex = edges[i].faces[0]->getThirdVertex(&edges[i]);
-        dotProduct = (thirdVertex->point.x - edges[i].pStartPoint->point.x) * 
-        (edges[i].pEndPoint->point.y - edges[i].pStartPoint->point.y) * (edges[i].pEndPoint->point.z - edges[i].pStartPoint->point.z) - 
-                    (edges[i].pEndPoint->point.x - edges[i].pStartPoint->point.x) * (thirdVertex->point.y - edges[i].pStartPoint->point.y) * (edges[i].pEndPoint->point.z - edges[i].pStartPoint->point.z) - 
-                    (edges[i].pEndPoint->point.x - edges[i].pStartPoint->point.x) * (edges[i].pEndPoint->point.y - edges[i].pStartPoint->point.y) * (thirdVertex->point.z - edges[i].pStartPoint->point.z);
-        /*
-        if (dotProduct <= 0)
-        {
-            edges[i].leftFace = &faces[0];
-            edges[i].rightFace = &faces[1];
-        }
-        else
-        {
-            edges[i].leftFace = &faces[1];
-            edges[i].rightFace = &faces[0];
-        }
-        */
+        startPointIndex = edges[i].startPointIndex;
+        endPointIndex = edges[i].endPointIndex;
+
+        thirdVertexIndex = edges[i].faces[0].getThirdVertex(i);
+
+        dotProduct = (vertices[thirdVertexIndex].point.x - vertices[startPointIndex].point.x) * 
+            (vertices[endPointIndex].point.y - vertices[startPointIndex].point.y) * (vertices[endPointIndex].point.z - vertices[startPointIndex].point.z) - 
+            (vertices[endPointIndex].point.x - vertices[startPointIndex].point.x) * (vertices[thirdVertexIndex].point.y - vertices[startPointIndex].point.y) * (vertices[endPointIndex].point.z - vertices[startPointIndex].point.z) - 
+            (vertices[endPointIndex].point.x - vertices[startPointIndex].point.x) * (vertices[endPointIndex].point.y - vertices[startPointIndex].point.y) * (vertices[thirdVertexIndex].point.z - vertices[startPointIndex].point.z);
+
         edges[i].leftFace = edges[i].faces[0];
         edges[i].rightFace = edges[i].faces[1];
     }
@@ -214,41 +197,20 @@ bool ObjReader::isUniqueEdge(Edge* newEdge, int &index)
     return true;
 }
 
-Edge* ObjReader::findEdge(Vertex *v1, Vertex *v2)
+int ObjReader::findEdge(int vertex1Index, int vertex2Index)
 {
-    Edge *foundEdge;
     for (int i = 0; i < edges.size(); i++)
-        if (edges[i].containsVertices(v1, v2))
-            foundEdge = &edges[i];
-    
-    return foundEdge;
+        if (edges[i].containsVertices(vertex1Index, vertex2Index))
+            return i;
 }
 
 void ObjReader::setEdgesForFaces()
 {
-    Edge *edge;
     for (int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++)
     {
-        edge = &edges[edgeIndex];
-
-        edge->leftFace->edges.push_back(edge);
-        edge->rightFace->edges.push_back(edge);
+        faces[edges[edgeIndex].leftFaceIndex].edgeIndexes.push_back(edgeIndex);
+        faces[edges[edgeIndex].rightFaceIndex].edgeIndexes.push_back(edgeIndex);
     }
-}
-
-std::vector<Vertex> ObjReader::getVertices()
-{
-    return vertices;
-}
-
-std::vector<Edge> ObjReader::getEdges()
-{
-    return edges;
-}
-
-std::vector<Face> ObjReader::getFaces()
-{
-    return faces;
 }
 
 int getVertexIndex(std::string vertex)

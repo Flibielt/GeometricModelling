@@ -22,8 +22,8 @@ public:
     bool isEdgeInFace(int index);
     void sortVertices();
 
-    int getThirdVertex(Edge* edge);
     int getThirdVertex(int index);
+    int getVertexPosition(int vertexIndex);
 
     Face(/* args */);
     ~Face();

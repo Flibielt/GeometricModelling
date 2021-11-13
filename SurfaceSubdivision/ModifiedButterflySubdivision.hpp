@@ -45,7 +45,8 @@ private:
     void clear();
 
     Edge createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique);
-    Edge* findEdge(Vertex *v1, Vertex *v2);
+    void createEdge(int faceIndex, int vertex1Index, int vertex2Index, bool &unique);
+    int findEdge(int vertex1Index, int vertex2Index);
     Vertex* findVertex(Vertex *searched);
     Vertex* findVertex(Vertex *searched, int &index);
     bool isUniqueEdge(Edge* newEdge, int &index);
