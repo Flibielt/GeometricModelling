@@ -15,8 +15,9 @@ private:
     Vertex center;
 public:
     int startVertexIndex, endVertexIndex;
-    int genertedVertexIndex;
+    int generatedVertexIndex;
 
+    std::vector<int> faces;
     int leftFaceIndex, rightFaceIndex;
 
     int leftTraversePredecessorIndex, leftTraverseSuccessorIndex;
