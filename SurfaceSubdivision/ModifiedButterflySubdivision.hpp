@@ -54,10 +54,6 @@ private:
     void setEdgeTraverses();
     void setEdgesForFaces();
 public:
-    std::vector<Vertex> vertices;
-    std::vector<Edge> edges;
-    std::vector<Face> faces;
-
     ModifiedButterflySubdivision(/* args */);
     ~ModifiedButterflySubdivision();
 
