@@ -23,6 +23,7 @@ private:
     int findEdge(int vertex1Index, int vertex2Index);
 
     bool isUniqueEdge(Edge* newEdge, int &index);
+    bool isUniqueEdge(int vertex1, int vertex2, int &index);
     void createEdges();
     void setEdgeFaces();
     void setEdgeTraverses();

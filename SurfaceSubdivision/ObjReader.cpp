@@ -111,7 +111,16 @@ void ObjReader::createEdges()
     {
         for (int i = 0; i < 3; i++)
         {
-            Edge edge = createEdge(faces[faceIndex], faces[faceIndex].vertices[i], faces[faceIndex].vertices[(i + 1) % 3], unique);
+            int vertex1Index, vertex2Index;
+            int vertex1, vertex2;
+
+            vertex1Index = i;
+            vertex2Index = (i + 1) % 3;
+
+            vertex1 = faces[faceIndex].verticesIndex[vertex1Index];
+            vertex2 = faces[faceIndex].verticesIndex[vertex2Index];
+            
+            Edge edge = createEdge(faceIndex, vertex1, vertex2, unique);
             
             if (unique)
                 edges.push_back(edge);
@@ -122,22 +131,22 @@ void ObjReader::createEdges()
 
 Edge ObjReader::createEdge(int faceIndex, int vertex1Index, int vertex2Index, bool &unique)
 {
-    int index = 0;
-
+    int edgeIndex = 0;
     Edge edge;
-    edge.startVertexIndex = vertex1Index;
-    edge.endVertexIndex = vertex2Index;
 
-    if (isUniqueEdge(&edge, index))
+    if (isUniqueEdge(vertex1Index, vertex2Index, edgeIndex))
     {
-        edge.faces.push_back(index);
+        edge.startVertexIndex = vertex1Index;
+        edge.endVertexIndex = vertex2Index;
+
+        edge.faces.push_back(faceIndex);
         unique = true;
     }
     else
     {
         // Search the existing edge and add the face
         unique = false;
-        edge.faces.push_back(index);
+        edges[edgeIndex].faces.push_back(faceIndex);
     }
     
     return edge;
@@ -151,35 +160,39 @@ void ObjReader::setEdgeFaces()
 
     for (int i = 0; i < edges.size(); i++)
     {
-        startPointIndex = edges[i].startPointIndex;
-        endPointIndex = edges[i].endPointIndex;
+        startPointIndex = edges[i].startVertexIndex;
+        endPointIndex = edges[i].endVertexIndex;
 
-        thirdVertexIndex = edges[i].faces[0].getThirdVertex(i);
+        thirdVertexIndex = faces[edges[i].faces[0]].getThirdVertex(i);
 
         dotProduct = (vertices[thirdVertexIndex].point.x - vertices[startPointIndex].point.x) * 
             (vertices[endPointIndex].point.y - vertices[startPointIndex].point.y) * (vertices[endPointIndex].point.z - vertices[startPointIndex].point.z) - 
             (vertices[endPointIndex].point.x - vertices[startPointIndex].point.x) * (vertices[thirdVertexIndex].point.y - vertices[startPointIndex].point.y) * (vertices[endPointIndex].point.z - vertices[startPointIndex].point.z) - 
             (vertices[endPointIndex].point.x - vertices[startPointIndex].point.x) * (vertices[endPointIndex].point.y - vertices[startPointIndex].point.y) * (vertices[thirdVertexIndex].point.z - vertices[startPointIndex].point.z);
 
-        edges[i].leftFace = edges[i].faces[0];
-        edges[i].rightFace = edges[i].faces[1];
+        edges[i].leftFaceIndex = edges[i].faces[0];
+        edges[i].rightFaceIndex = edges[i].faces[1];
     }
 }
 
 void ObjReader::setEdgeTraverses()
 {
-    int vertexIndex;
+    int vertexPosition;
     Edge *foundEdge;
 
     for (int i = 0; i < edges.size(); i++)
     {
-        vertexIndex = edges[i].leftFace->getVertexIndex(edges[i].pStartPoint);
-        edges[i].leftTraversePredecessor = findEdge(edges[i].leftFace->vertices[(vertexIndex - 1 + 3) % 3], edges[i].leftFace->vertices[vertexIndex]);
-        edges[i].leftTraverseSuccessor = findEdge(edges[i].leftFace->vertices[(vertexIndex + 1) % 3], edges[i].leftFace->vertices[(vertexIndex + 2) % 3]);
+        int leftFaceIndex, rightFaceIndex;
+        leftFaceIndex = edges[i].leftFaceIndex;
+        rightFaceIndex = edges[i].rightFaceIndex;
+        
+        vertexPosition = faces[leftFaceIndex].getVertexPosition(edges[i].startVertexIndex);
+        edges[i].leftTraversePredecessorIndex = findEdge(faces[leftFaceIndex].verticesIndex[(vertexPosition - 1 + 3) % 3], faces[leftFaceIndex].verticesIndex[vertexPosition]);
+        edges[i].leftTraverseSuccessorIndex = findEdge(faces[leftFaceIndex].verticesIndex[(vertexPosition + 1) % 3], faces[leftFaceIndex].verticesIndex[(vertexPosition + 2) % 3]);
 
-        vertexIndex = edges[i].rightFace->getVertexIndex(edges[i].pEndPoint);
-        edges[i].rightTraversePredecessor = findEdge(edges[i].rightFace->vertices[(vertexIndex - 1 + 3) % 3], edges[i].rightFace->vertices[vertexIndex]);
-        edges[i].rightTraverseSuccessor = findEdge(edges[i].rightFace->vertices[(vertexIndex + 1) % 3], edges[i].rightFace->vertices[(vertexIndex + 2) % 3]);
+        vertexPosition = faces[rightFaceIndex].getVertexPosition(edges[i].endVertexIndex);
+        edges[i].rightTraversePredecessorIndex = findEdge(faces[rightFaceIndex].verticesIndex[(vertexPosition - 1 + 3) % 3], faces[rightFaceIndex].verticesIndex[vertexPosition]);
+        edges[i].rightTraverseSuccessorIndex = findEdge(faces[rightFaceIndex].verticesIndex[(vertexPosition + 1) % 3], faces[rightFaceIndex].verticesIndex[(vertexPosition + 2) % 3]);
     }
 }
 
@@ -197,19 +210,41 @@ bool ObjReader::isUniqueEdge(Edge* newEdge, int &index)
     return true;
 }
 
+bool ObjReader::isUniqueEdge(int vertex1, int vertex2, int &index)
+{
+    index = -1;
+    for (int i = 0; i < edges.size(); i++)
+    {
+        if (edges[i].startVertexIndex == vertex1 && edges[i].endVertexIndex == vertex2)
+        {
+            index = i;
+            return false;
+        }
+        else if (edges[i].endVertexIndex == vertex1 && edges[i].startVertexIndex == vertex2)
+        {
+            index = i;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int ObjReader::findEdge(int vertex1Index, int vertex2Index)
 {
     for (int i = 0; i < edges.size(); i++)
         if (edges[i].containsVertices(vertex1Index, vertex2Index))
             return i;
+    
+    return -1;
 }
 
 void ObjReader::setEdgesForFaces()
 {
     for (int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++)
     {
-        faces[edges[edgeIndex].leftFaceIndex].edgeIndexes.push_back(edgeIndex);
-        faces[edges[edgeIndex].rightFaceIndex].edgeIndexes.push_back(edgeIndex);
+        faces[edges[edgeIndex].leftFaceIndex].edgesIndex.push_back(edgeIndex);
+        faces[edges[edgeIndex].rightFaceIndex].edgesIndex.push_back(edgeIndex);
     }
 }
 
