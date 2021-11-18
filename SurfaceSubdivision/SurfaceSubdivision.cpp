@@ -98,10 +98,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	{
 		modifiedButterfly.subdivide();
 
-		vertices = modifiedButterfly.vertices;
-		edges = modifiedButterfly.edges;
-		faces = modifiedButterfly.faces;
-
 		updateData();
 	}
 }
@@ -171,10 +167,6 @@ void display(GLFWwindow* window, double currentTime) {
 int main(void) {
 
 	objReader.readFile("icos.obj");
-
-	modifiedButterfly.vertices = vertices;
-	modifiedButterfly.edges = edges;
-	modifiedButterfly.faces = faces;
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 

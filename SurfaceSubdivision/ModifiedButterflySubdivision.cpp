@@ -139,37 +139,53 @@ void ModifiedButterflySubdivision::createNewFaces()
 
 void ModifiedButterflySubdivision::createEdges()
 {
+    std::vector<Edge>::iterator it;
     int index;
     bool unique;
 
-    for (int i = 0; i < faces.size(); i++)
+    for (int faceIndex = 0; faceIndex < faces.size(); faceIndex++)
     {
-        for (int j = 0; j < 3; j++)
+        for (int i = 0; i < 3; i++)
         {
-            createEdge(i, faces[i].verticesIndex[j], faces[i].verticesIndex[(j + 1) % 3], unique);
+            int vertex1Index, vertex2Index;
+            int vertex1, vertex2;
+
+            vertex1Index = i;
+            vertex2Index = (i + 1) % 3;
+
+            vertex1 = faces[faceIndex].verticesIndex[vertex1Index];
+            vertex2 = faces[faceIndex].verticesIndex[vertex2Index];
+            
+            Edge edge = createEdge(faceIndex, vertex1, vertex2, unique);
+            
+            if (unique)
+                edges.push_back(edge);
+            
         }
     }
 }
 
-void ModifiedButterflySubdivision::createEdge(int faceIndex, int vertex1Index, int vertex2Index, bool &unique)
+Edge ModifiedButterflySubdivision::createEdge(int faceIndex, int vertex1Index, int vertex2Index, bool &unique)
 {
+    int edgeIndex = 0;
     Edge edge;
-    int index = 0;
 
-    edge.startVertexIndex = vertex1Index;
-    edge.endVertexIndex = vertex2Index;
-
-    if (isUniqueEdge(&edge, index))
+    if (isUniqueEdge(vertex1Index, vertex2Index, edgeIndex))
     {
-        edges.push_back(edge);
-        edge.faces.push_back(edges.size() - 1);
+        edge.startVertexIndex = vertex1Index;
+        edge.endVertexIndex = vertex2Index;
+
+        edge.faces.push_back(faceIndex);
         unique = true;
     }
     else
     {
-        edges[index].faces.push_back(faceIndex);
+        // Search the existing edge and add the face
         unique = false;
+        edges[edgeIndex].faces.push_back(faceIndex);
     }
+    
+    return edge;
 }
 
 void ModifiedButterflySubdivision::setEdgeFaces()
@@ -223,6 +239,26 @@ bool ModifiedButterflySubdivision::isUniqueEdge(Edge* newEdge, int &index)
             return false;
         
         index++;
+    }
+
+    return true;
+}
+
+bool ModifiedButterflySubdivision::isUniqueEdge(int vertex1, int vertex2, int &index)
+{
+    index = -1;
+    for (int i = 0; i < edges.size(); i++)
+    {
+        if (edges[i].startVertexIndex == vertex1 && edges[i].endVertexIndex == vertex2)
+        {
+            index = i;
+            return false;
+        }
+        else if (edges[i].endVertexIndex == vertex1 && edges[i].startVertexIndex == vertex2)
+        {
+            index = i;
+            return false;
+        }
     }
 
     return true;
