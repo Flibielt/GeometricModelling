@@ -57,6 +57,9 @@ Vertex ObjReader::parseVertex(std::string line)
     float coordinate;
     while (std::getline(text, segment, ' '))
     {
+        if (segment.length() < 1)
+            continue;
+        
         if (index == 1)
         {
             coordinate = std::stof(segment);
@@ -89,6 +92,9 @@ Face ObjReader::parseFace(std::string line)
     int vertexIndex;
     while (std::getline(text, segment, ' '))
     {
+        if (segment.length() < 1)
+            continue;
+        
         if (index > 0)
         {
             vertexIndex = getVertexIndex(segment);

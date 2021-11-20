@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 #include "Vertex.hpp"
 #include "Edge.hpp"
