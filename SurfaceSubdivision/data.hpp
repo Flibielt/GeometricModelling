@@ -6,6 +6,7 @@
 #include "Face.hpp"
 
 #include <vector>
+#include <fstream>
 
 // Needed to predefine the edge and face class
 class Edge;
@@ -14,6 +15,7 @@ class Face;
 extern std::vector<Vertex> vertices;
 extern std::vector<Edge> edges;
 extern std::vector<Face> faces;
+extern int iteration;
 
 Edge createEdge(int faceIndex, int vertex1Index, int vertex2Index, bool &unique);
 int findEdge(int vertex1Index, int vertex2Index);
@@ -22,5 +24,7 @@ void createEdges();
 void setEdgeFaces();
 void setEdgeTraverses();
 void setEdgesForFaces();
+
+void createObjFile();
 
 #endif

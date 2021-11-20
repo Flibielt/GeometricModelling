@@ -145,3 +145,22 @@ void setEdgesForFaces()
         faces[edges[edgeIndex].rightFaceIndex].edgesIndex.push_back(edgeIndex);
     }
 }
+
+void createObjFile()
+{
+    std::string fileName = "iteratoin_" + std::to_string(iteration) + ".obj";
+    std::ofstream objFile(fileName);
+    objFile.clear();
+
+    std::cout << "Write to: iteration_" << std::to_string(iteration) << ".obj" << std::endl;
+
+    for (int i = 0; i < vertices.size(); i++)
+        objFile << "v " << vertices[i].point.x << " " << vertices[i].point.y << " "  << vertices[i].point.z << std::endl;
+
+    for (int i = 0; i < faces.size(); i++)
+        objFile << "f " << faces[i].verticesIndex[0] + 1 << " " << faces[i].verticesIndex[1] + 1 << " "  
+            << faces[i].verticesIndex[2] + 1 << std::endl;
+
+    objFile.close();
+    std::cout << "Finished write" << std::endl;
+}
