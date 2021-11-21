@@ -32,7 +32,7 @@ void ObjReader::readFile(std::string fileName)
             // Format: f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
             else if (line.rfind("f ", 0) == 0) {
                 Face face = parseFace(line);
-                face.sortVertices();
+                // face.sortVertices();
                 faces.push_back(face);
             }
         }
