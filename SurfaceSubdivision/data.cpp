@@ -156,6 +156,8 @@ void createObjFile()
 
     for (int i = 0; i < vertices.size(); i++)
         objFile << "v " << vertices[i].point.x << " " << vertices[i].point.y << " "  << vertices[i].point.z << std::endl;
+    
+    objFile << std::endl;
 
     for (int i = 0; i < faces.size(); i++)
         objFile << "f " << faces[i].verticesIndex[0] + 1 << " " << faces[i].verticesIndex[1] + 1 << " "  
