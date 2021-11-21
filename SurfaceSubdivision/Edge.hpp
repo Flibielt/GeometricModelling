@@ -48,6 +48,8 @@ public:
 
     bool operator==(const Edge& other);
     bool operator!=(const Edge& other);
+
+    int getOtherVertexIndex(int vertexIndex);
 };
 
 
