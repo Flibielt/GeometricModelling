@@ -98,6 +98,8 @@ Face ObjReader::parseFace(std::string line)
         if (index > 0)
         {
             vertexIndex = getVertexIndex(segment);
+            // In the obj files vertex indexes starts with 1
+            vertexIndex--;
             face.verticesIndex.push_back(vertexIndex);
         }
 
@@ -109,15 +111,10 @@ Face ObjReader::parseFace(std::string line)
 
 int getVertexIndex(std::string vertex)
 {
-    int vertexIndex = 0;
     std::size_t index = vertex.find("/");
 
     if (index == std::string::npos)
         return std::stoi(vertex);
 
-    vertexIndex = std::stoi(vertex.substr(0, index));
-    // In the obj files vertex indexes starts with 1
-    vertexIndex--; 
-    
-    return vertexIndex;
+    return std::stoi(vertex.substr(0, index));
 }
