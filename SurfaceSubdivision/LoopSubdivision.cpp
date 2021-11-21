@@ -14,9 +14,11 @@ void LoopSubdivision::subdivide()
     std::cout << "Old edge count: " << faces.size() << std::endl;
     std::cout << "Old face count: " << edges.size() << std::endl;
 
-    splitEdges();
+    // Approximate the vertices' position
+    approximate();
 
-    // todo: Move the vertices to a better position
+    // Create new vertices by splitting the edges
+    splitEdges();
 
     clear();
     createEdges();
@@ -106,11 +108,49 @@ void LoopSubdivision::clear()
     faces.clear();
     edges.clear();
 
-    
     for (int i = 0; i < newFaces.size(); i++)
         faces.push_back(newFaces[i]);
     
-    
     newFaces.clear();
     
+}
+
+void LoopSubdivision::approximate()
+{
+    for (int vertexIndex = 0; vertexIndex < vertices.size(); vertexIndex++)
+    {
+        Vertex s, newValue;
+        int n = 0;
+        float alpha = 0.0, beta = 0.0;
+        
+        s.point.x = 0;
+        s.point.y = 0;
+        s.point.z = 0;
+
+        for (int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++)
+        {
+            int tmpVertexIndex = 0;
+            if (edges[edgeIndex].containsVertex(vertexIndex)) 
+            {
+                tmpVertexIndex = edges[edgeIndex].getOtherVertexIndex(vertexIndex);
+
+                s.point.x += vertices[tmpVertexIndex].point.x;
+                s.point.y += vertices[tmpVertexIndex].point.y;
+                s.point.z += vertices[tmpVertexIndex].point.z;
+
+                n++;
+            }
+        }
+
+        beta = pow((float)3 / (float)8 + cos(2 * M_PI / (float)n), 2);
+        alpha = ((float)5 / (float)8 - beta) / (float)n;
+
+        newValue.point.x = (1 - n * alpha) * vertices[vertexIndex].point.x + alpha * s.point.x;
+        newValue.point.y = (1 - n * alpha) * vertices[vertexIndex].point.y + alpha * s.point.y;
+        newValue.point.z = (1 - n * alpha) * vertices[vertexIndex].point.z + alpha * s.point.z;
+
+        vertices[vertexIndex].point.x = newValue.point.x;
+        vertices[vertexIndex].point.y = newValue.point.y;
+        vertices[vertexIndex].point.z = newValue.point.z;
+    }
 }
