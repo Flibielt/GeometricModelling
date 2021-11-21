@@ -1,5 +1,7 @@
 **/vscode_build
 
+# Subdivision generated OBJ files
+iteratoin_*.obj
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,c++
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,c++

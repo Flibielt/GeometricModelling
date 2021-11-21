@@ -3,20 +3,17 @@
 
 Edge::Edge(/* args */)
 {
-    this->pStartPoint = nullptr;
-    this->pEndPoint = nullptr;
-    this->generatedVertex = nullptr;
+    startVertexIndex = -1;
+    endVertexIndex = -1;
 
-    this->leftFace = nullptr;
-    this->rightFace = nullptr;
+    leftFaceIndex = -1;
+    rightFaceIndex = -1;
 
-    this->leftTraversePredecessor = nullptr;
-    this->leftTraverseSuccessor = nullptr;
+    leftTraversePredecessorIndex = -1;
+    leftTraverseSuccessorIndex = -1;
 
-    this->rightTraversePredecessor = nullptr;
-    this->rightTraverseSuccessor = nullptr;
-
-    generatedVertexIndex = -1;
+    rightTraversePredecessorIndex = -1;
+    rightTraverseSuccessorIndex = -1;
 }
 
 Edge::~Edge()
@@ -25,53 +22,58 @@ Edge::~Edge()
 
 void Edge::calculateCenter()
 {
-    center.point.x = (pStartPoint->point.x + pEndPoint->point.x) / 2;
-    center.point.y = (pStartPoint->point.y + pEndPoint->point.y) / 2;
-    center.point.z = (pStartPoint->point.z + pEndPoint->point.z) / 2;
+    center.point.x = (vertices[startVertexIndex].point.x + vertices[endVertexIndex].point.x) / 2;
+    center.point.y = (vertices[startVertexIndex].point.y + vertices[endVertexIndex].point.y) / 2;
+    center.point.z = (vertices[startVertexIndex].point.z + vertices[endVertexIndex].point.z) / 2;
 }
 
 bool Edge::containsVertex(Vertex *v)
 {
-    return *(this->pStartPoint) == *v || *(this->pEndPoint) == *v;
+    return vertices[startVertexIndex] == *v || vertices[endVertexIndex] == *v;
+}
+
+bool Edge::containsVertex(int index)
+{
+    return startVertexIndex == index || endVertexIndex == index;
 }
 
 bool Edge::containsVertices(Vertex *v1, Vertex *v2)
 {
-    if (*(this->pStartPoint) == *v1 && *(this->pEndPoint) == *v2)
-        return true;
-    else if (*(this->pEndPoint) == *v1 && *(this->pStartPoint) == *v2)
-        return true;
-    
-    return false;
+    return containsVertex(v1) && containsVertex(v2);
 }
 
-std::vector<Vertex*> Edge::get1per8Vertices()
+bool Edge::containsVertices(int index1, int index2)
 {
-    std::vector<Vertex*> vertices;
+    return containsVertex(index1) && containsVertex(index2);
+}
 
-    vertices.push_back(this->leftTraverseSuccessor->pEndPoint);
-    vertices.push_back(this->rightTraverseSuccessor->pEndPoint);
+std::vector<int> Edge::get1per8Vertices()
+{
+    std::vector<int> vertices;
+
+    vertices.push_back(edges[this->leftTraversePredecessorIndex].endVertexIndex);
+    vertices.push_back(edges[this->rightTraverseSuccessorIndex].endVertexIndex);
 
     return vertices;
 }
 
-std::vector<Vertex*> Edge::get1per16Vertices()
+std::vector<int> Edge::get1per16Vertices()
 {
-    std::vector<Vertex*> vertices;
+    std::vector<int> vertices;
 
-    vertices.push_back(this->leftTraversePredecessor->rightTraverseSuccessor->pEndPoint);
-    vertices.push_back(this->leftTraverseSuccessor->rightTraverseSuccessor->pEndPoint);
-    vertices.push_back(this->rightTraverseSuccessor->leftTraverseSuccessor->pEndPoint);
-    vertices.push_back(this->rightTraversePredecessor->leftTraverseSuccessor->pEndPoint);
+    vertices.push_back(edges[edges[this->leftTraversePredecessorIndex].rightTraversePredecessorIndex].endVertexIndex);
+    vertices.push_back(edges[edges[this->leftTraverseSuccessorIndex].rightTraverseSuccessorIndex].endVertexIndex);
+    vertices.push_back(edges[edges[this->rightTraverseSuccessorIndex].leftTraverseSuccessorIndex].endVertexIndex);
+    vertices.push_back(edges[edges[this->rightTraversePredecessorIndex].leftTraverseSuccessorIndex].endVertexIndex);
 
     return vertices;
 }
 
 bool Edge::operator==(const Edge& other)
 {
-    if (this->pEndPoint == other.pEndPoint && this->pStartPoint == other.pStartPoint)
+    if (this->endVertexIndex == other.endVertexIndex && this->startVertexIndex == other.startVertexIndex)
         return true;
-    else if (this->pStartPoint == other.pEndPoint && this->pEndPoint == other.pStartPoint)
+    else if (this->endVertexIndex == other.endVertexIndex && this->startVertexIndex == other.startVertexIndex)
         return true;
     
     return false;

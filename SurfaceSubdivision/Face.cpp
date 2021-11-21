@@ -12,36 +12,31 @@ Face::~Face()
 
 bool Face::isEdgeInFace(Edge* edge)
 {
-    bool startFound = false, endFound = false;
-    
-    for (Vertex* Vertex : vertices)
+    for (int index : verticesIndex)
     {
-        if (Vertex->point == edge->pStartPoint->point)
-            startFound = true;
-        else if (Vertex->point == edge->pEndPoint->point)
-            endFound = true;
-        
-        if (startFound && endFound)
-            break;
+        if (index == edge->startVertexIndex)
+            return true;
+        else if (index == edge->endVertexIndex)
+            return true;
     }
 
-    return startFound && endFound;
+    return false;
 }
 
 void Face::sortVertices()
 {
-    Vertex *swap;
+    int swap;
     calculateCenter();
 
     std::cout << std::endl;
 
-    for (int i = 0; i < vertices.size() - 1; i++)
-        for (int j = 0; j < vertices.size() - i - 1; j++)
-            if (comparePointOrder(&center, vertices[i], vertices[j]))
+    for (int i = 0; i < verticesIndex.size() - 1; i++)
+        for (int j = 0; j < verticesIndex.size() - i - 1; j++)
+            if (comparePointOrder(&center, verticesIndex[i], verticesIndex[j]))
             {
-                swap = vertices[i];
-                vertices[i] = vertices[j];
-                vertices[j] = swap;
+                swap = verticesIndex[i];
+                verticesIndex[i] = verticesIndex[j];
+                verticesIndex[j] = swap;
             }
 }
 
@@ -51,11 +46,11 @@ void Face::calculateCenter()
     center.point.y = 0.0;
     center.point.z = 0.0;
 
-    for (Vertex *vertex : vertices)
+    for (int index : verticesIndex)
     {
-        center.point.x += vertex->point.x;
-        center.point.y += vertex->point.y;
-        center.point.z += vertex->point.z;
+        center.point.x += vertices[index].point.x;
+        center.point.y += vertices[index].point.y;
+        center.point.z += vertices[index].point.z;
     }
 
     center.point.x /= vertices.size();
@@ -63,22 +58,25 @@ void Face::calculateCenter()
     center.point.z /= vertices.size();
 }
 
-Vertex* Face::getThirdVertex(Edge* edge)
+int Face::getThirdVertex(int edgeIndex)
 {
-    Vertex *foundVertex;
+    int foundVertexIndex;
 
-    for (int i = 0; i< vertices.size(); i++)
-        if (*vertices[i] != *(edge->pStartPoint) && *vertices[i] != *(edge->pEndPoint))
-            foundVertex = vertices[i];
+    for (int i = 0; i< verticesIndex.size(); i++)
+        if (verticesIndex[i] != edges[edgeIndex].startVertexIndex && verticesIndex[i] != edges[edgeIndex].endVertexIndex)
+            foundVertexIndex = verticesIndex[i];
     
-    return foundVertex;
+    return foundVertexIndex;
 }
 
-int Face::getVertexIndex(Vertex *vertex)
+int Face::getVertexPosition(int vertexIndex)
 {
-    for (int index = 0; index < vertices.size(); index++)
-        if (*vertices[index] == *vertex)
-            return index;
-    
+    for (int i = 0; i < verticesIndex.size(); i++)
+    {
+        if (verticesIndex[i] == vertexIndex)
+        {
+            return i;
+        }
+    }
     return -1;
 }

@@ -32,31 +32,11 @@ private:
     void createNewFaces();
 
     /**
-     * @brief Create new edges from the new faces.
-     * 
-     * Delete the old edges, then create new edges from the newly created faces.
-     */
-    void createEdges();
-
-    /**
      * @brief Clear the old faces and edges
      * 
      */
     void clear();
-
-    Edge createEdge(Face &face, Vertex *vertex1, Vertex *vertex2, bool &unique);
-    Edge* findEdge(Vertex *v1, Vertex *v2);
-    Vertex* findVertex(Vertex *searched);
-    Vertex* findVertex(Vertex *searched, int &index);
-    bool isUniqueEdge(Edge* newEdge, int &index);
-    void setEdgeFaces();
-    void setEdgeTraverses();
-    void setEdgesForFaces();
 public:
-    std::vector<Vertex> vertices;
-    std::vector<Edge> edges;
-    std::vector<Face> faces;
-
     ModifiedButterflySubdivision(/* args */);
     ~ModifiedButterflySubdivision();
 

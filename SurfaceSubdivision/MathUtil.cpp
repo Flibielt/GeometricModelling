@@ -1,18 +1,18 @@
 #include "MathUtil.hpp"
 
-bool comparePointOrder(Vertex *center, Vertex *v1, Vertex *v2)
+bool comparePointOrder(Vertex *center, int vertexIndex1, int vertexIndex2)
 {
     float angle1, angle2;
     float distance1, distance2;
 
-    angle1 = calculateAngle(center, v1);
-    angle2 = calculateAngle(center, v2);
+    angle1 = calculateAngle(center, &vertices[vertexIndex1]);
+    angle2 = calculateAngle(center, &vertices[vertexIndex2]);
 
     if (angle1 < angle2)
         return true;
     
-    distance1 = calculateDistance(center, v1);
-    distance2 = calculateDistance(center, v2);
+    distance1 = calculateDistance(center, &vertices[vertexIndex1]);
+    distance2 = calculateDistance(center, &vertices[vertexIndex2]);
 
     return angle1 == angle2 && distance1 < distance2;
 }

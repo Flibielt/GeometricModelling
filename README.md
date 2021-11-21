@@ -1,8 +1,12 @@
 # Geomteric modelling
 
 University projects using OpenGL
-
+     
 ## Subdivision for surfaces
+
+Sample OBJ files:
+
+https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
 
 ### Winged-Edge data structure
 

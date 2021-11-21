@@ -20,6 +20,15 @@
 #include "ObjReader.hpp"
 #include "ModifiedButterflySubdivision.hpp"
 
+#include "data.hpp"
+
+// Global variables from data.hpp
+std::vector<Vertex> vertices;
+std::vector<Edge> edges;
+std::vector<Face> faces;
+int iteration = 0;
+
+std::string fileName = "icos.obj";
 
 static std::vector<glm::vec3> myPoints =
 {
@@ -33,9 +42,6 @@ glm::mat4 view;
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 100.0f);
 
 std::vector<glm::vec3> points;
-std::vector<Vertex> vertices;
-std::vector<Edge> edges;
-std::vector<Face> faces;
 size_t faceSize;
 
 GLuint VBO;
@@ -52,19 +58,15 @@ void updateData()
 
 	for (Edge edge : edges)
 	{
-		allPoints.push_back(edge.pStartPoint->point);
-		allPoints.push_back(edge.pEndPoint->point);
+		allPoints.push_back(vertices[edge.startVertexIndex].point);
+		allPoints.push_back(vertices[edge.endVertexIndex].point);
 	}
 
 	faceSize = allPoints.size();
 
 	for (Face face :faces)
-	{
-		for (int i = 0; i < face.vertices.size(); i++)
-		{
-			allPoints.push_back(face.vertices[i]->point);
-		}
-	}
+		for (int i = 0; i < face.verticesIndex.size(); i++)
+			allPoints.push_back(vertices[face.verticesIndex[i]].point);
 	
 	faceSize = allPoints.size() - faceSize;
 
@@ -97,13 +99,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
 	{
+		iteration++;
 		modifiedButterfly.subdivide();
 
-		vertices = modifiedButterfly.vertices;
-		edges = modifiedButterfly.edges;
-		faces = modifiedButterfly.faces;
-
 		updateData();
+		createObjFile();
 	}
 }
 
@@ -171,15 +171,8 @@ void display(GLFWwindow* window, double currentTime) {
 
 int main(void) {
 
-	objReader.readFile("icos.obj");
-	
-	vertices = objReader.getVertices();
-	edges = objReader.getEdges();
-	faces = objReader.getFaces();
-
-	modifiedButterfly.vertices = vertices;
-	modifiedButterfly.edges = edges;
-	modifiedButterfly.faces = faces;
+	objReader.readFile(fileName);
+	createObjFile();
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
@@ -187,7 +180,7 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Surface Subversion", NULL, NULL);
-	//glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
 	glfwMakeContextCurrent(window);
 
