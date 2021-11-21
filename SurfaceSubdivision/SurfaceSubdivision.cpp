@@ -26,6 +26,9 @@
 std::vector<Vertex> vertices;
 std::vector<Edge> edges;
 std::vector<Face> faces;
+int iteration = 0;
+
+std::string fileName = "icos.obj";
 
 static std::vector<glm::vec3> myPoints =
 {
@@ -96,9 +99,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
 	{
+		iteration++;
 		modifiedButterfly.subdivide();
 
 		updateData();
+		createObjFile();
 	}
 }
 
@@ -166,7 +171,8 @@ void display(GLFWwindow* window, double currentTime) {
 
 int main(void) {
 
-	objReader.readFile("icos.obj");
+	objReader.readFile(fileName);
+	createObjFile();
 
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
@@ -174,7 +180,7 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Surface Subversion", NULL, NULL);
-	//glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
 	glfwMakeContextCurrent(window);
 
