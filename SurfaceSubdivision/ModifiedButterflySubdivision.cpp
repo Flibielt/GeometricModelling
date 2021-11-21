@@ -104,26 +104,21 @@ void ModifiedButterflySubdivision::splitEdges()
 
 void ModifiedButterflySubdivision::createNewFaces()
 {
-    // Vertex *vertex;
-
     for (int i = 0; i < faces.size(); i++)
     {
-        //face = &faces[i];
 
         // Create new faces using one old vertex and two new vertices
         for (int vertexIndex = 0; vertexIndex < faces[i].verticesIndex.size(); vertexIndex++)
         {
             Face newFace;
-            //vertex = faces[i].verticesIndex[vertexIndex];
             newFace.verticesIndex.push_back(faces[i].verticesIndex[vertexIndex]);
-            // vertex = nullptr;
 
             // Find the 2 edges which contains the current old vertex, then add the generated vertices
             for (int edgeIndex = 0; edgeIndex < faces[i].edgesIndex.size(); edgeIndex++)
                 if (edges[faces[i].edgesIndex[edgeIndex]].containsVertex(faces[i].verticesIndex[vertexIndex]))
                     newFace.verticesIndex.push_back(edges[faces[i].edgesIndex[edgeIndex]].generatedVertexIndex);
             
-            newFace.sortVertices();
+            // newFace.sortVertices();
             newFaces.push_back(newFace);
         }
 
@@ -132,7 +127,7 @@ void ModifiedButterflySubdivision::createNewFaces()
         for (int edgeIndex = 0; edgeIndex < faces[i].edgesIndex.size(); edgeIndex++)
             newFace.verticesIndex.push_back(edges[faces[i].edgesIndex[edgeIndex]].generatedVertexIndex);
         
-        newFace.sortVertices();
+        // newFace.sortVertices();
         newFaces.push_back(newFace);
     }
 }
