@@ -83,3 +83,11 @@ bool Edge::operator!=(const Edge& other)
 {
     return !(this == &other);
 }
+
+int Edge::getOtherVertexIndex(int vertexIndex)
+{
+    if (vertexIndex == startVertexIndex)
+        return endVertexIndex;
+    else
+        return startVertexIndex;
+}

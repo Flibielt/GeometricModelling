@@ -19,6 +19,7 @@
 #include "Face.hpp"
 #include "ObjReader.hpp"
 #include "ModifiedButterflySubdivision.hpp"
+#include "LoopSubdivision.hpp"
 
 #include "data.hpp"
 
@@ -51,6 +52,7 @@ GLuint renderingProgram;
 
 ObjReader objReader;
 ModifiedButterflySubdivision modifiedButterfly;
+LoopSubdivision loopSubdivision;
 
 void updateData()
 {
@@ -101,6 +103,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	{
 		iteration++;
 		modifiedButterfly.subdivide();
+
+		updateData();
+		createObjFile();
+	}
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+	{
+		iteration++;
+		loopSubdivision.subdivide();
 
 		updateData();
 		createObjFile();
