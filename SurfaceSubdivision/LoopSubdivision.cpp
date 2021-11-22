@@ -20,6 +20,8 @@ void LoopSubdivision::subdivide()
     // Create new vertices by splitting the edges
     splitEdges();
 
+    createNewFaces();
+
     clear();
     createEdges();
 
@@ -37,6 +39,7 @@ void LoopSubdivision::splitEdges()
     for (int i = 0; i < edges.size(); i++)
     {
         Vertex vertex;
+        int vertexIndex;
         std::vector<int> vertices3per8;
         std::vector<int> vertices1per8;
 
@@ -53,16 +56,20 @@ void LoopSubdivision::splitEdges()
 
         for (int j = 0; j < vertices3per8.size(); j++)
         {
-            vertex.point.x += ((float)3 * vertices[j].point.x) / (float)8;
-            vertex.point.y += ((float)3 * vertices[j].point.y) / (float)8;
-            vertex.point.z += ((float)3 * vertices[j].point.z) / (float)8;
+            vertexIndex = vertices3per8[j];
+
+            vertex.point.x += ((float)3 * vertices[vertexIndex].point.x) / (float)8;
+            vertex.point.y += ((float)3 * vertices[vertexIndex].point.y) / (float)8;
+            vertex.point.z += ((float)3 * vertices[vertexIndex].point.z) / (float)8;
         }
 
         for (int j = 0; j < vertices1per8.size(); j++)
         {
-            vertex.point.x += vertices[j].point.x / (float)8;
-            vertex.point.y += vertices[j].point.y / (float)8;
-            vertex.point.z += vertices[j].point.z / (float)8;
+            vertexIndex = vertices3per8[j];
+
+            vertex.point.x += vertices[vertexIndex].point.x / (float)8;
+            vertex.point.y += vertices[vertexIndex].point.y / (float)8;
+            vertex.point.z += vertices[vertexIndex].point.z / (float)8;
         }
 
         vertices.push_back(vertex);
